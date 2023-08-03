@@ -2,3 +2,5 @@ notes.md
 env/
 images/
 models/
+__pycache__
+.pyc
