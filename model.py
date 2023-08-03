@@ -2,6 +2,8 @@
 
 import torch
 from dalle2_pytorch import DALLE2, DiffusionPriorNetwork, DiffusionPrior, Unet, Decoder, OpenAIClipAdapter
+import matplotlib.pyplot as plt
+import numpy as np
 
 TEXT_INPUT = 'a road to nowhere'
 
@@ -65,22 +67,32 @@ decoder = Decoder(
     text_cond_drop_prob = 0.5
 )
 
-for unet_number in (1, 2):
-    loss = decoder(images, text = text, unet_number = unet_number) # this can optionally be decoder(images, text) if you wish to condition on the text encodings as well, though it was hinted in the paper it didn't do much
-    loss.backward()
+def train_model():
+    for unet_number in (1, 2):
+        loss = decoder(images, text = text, unet_number = unet_number) # this can optionally be decoder(images, text) if you wish to condition on the text encodings as well, though it was hinted in the paper it didn't do much
+        loss.backward()
 
 # do above for many steps
+def generate_images():
+    dalle2 = DALLE2(
+        prior = diffusion_prior,
+        decoder = decoder
+    )
 
-dalle2 = DALLE2(
-    prior = diffusion_prior,
-    decoder = decoder
-)
+    images = dalle2(
+        [TEXT_INPUT],
+        cond_scale = 2. # classifier free guidance strength (> 1 would strengthen the condition)
+    ).detach().cpu().numpy()
 
-images = dalle2(
-    [TEXT_INPUT],
-    cond_scale = 2. # classifier free guidance strength (> 1 would strengthen the condition)
-)
+    # save your image (in this example, of size 256x256)
 
-print(images)
+    images = images.squeeze(axis = 0) # since the output is 4D and 0 axis is your batch size of 1 we can squeeze the axis .
+    images = np.transpose(images, (1,2,0)) # shifting the channel to last axis as pytorch takes image input as batch_size x Channel x Image width x Image Height .
+    plt.imsave("images/dalle2_output.png", images) # finally save your prediction .
 
-# save your image (in this example, of size 256x256)
+
+if __name__ == '__main__':
+    train_model()
+    generate_images()
+    
+
