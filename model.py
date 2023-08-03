@@ -11,8 +11,8 @@ clip = OpenAIClipAdapter()
 
 # mock data
 
-text = torch.randint(0, 49408, (4, 256)).cuda()
-images = torch.randn(4, 3, 256, 256).cuda()
+text = torch.randint(0, 49408, (4, 256))
+images = torch.randn(4, 3, 256, 256)
 
 # prior networks (with transformer)
 
@@ -21,14 +21,14 @@ prior_network = DiffusionPriorNetwork(
     depth = 6,
     dim_head = 64,
     heads = 8
-).cuda()
+)
 
 diffusion_prior = DiffusionPrior(
     net = prior_network,
     clip = clip,
     timesteps = 100,
     cond_drop_prob = 0.2
-).cuda()
+)
 
 loss = diffusion_prior(text, images)
 loss.backward()
@@ -45,7 +45,7 @@ unet1 = Unet(
     dim_mults=(1, 2, 4, 8),
     text_embed_dim = 512,
     cond_on_text_encodings = True  # set to True for any unets that need to be conditioned on text encodings (ex. first unet in cascade)
-).cuda()
+)
 
 unet2 = Unet(
     dim = 16,
@@ -53,7 +53,7 @@ unet2 = Unet(
     cond_dim = 128,
     channels = 3,
     dim_mults = (1, 2, 4, 8, 16)
-).cuda()
+)
 
 decoder = Decoder(
     unet = (unet1, unet2),
@@ -63,7 +63,7 @@ decoder = Decoder(
     sample_timesteps = (250, 27),
     image_cond_drop_prob = 0.1,
     text_cond_drop_prob = 0.5
-).cuda()
+)
 
 for unet_number in (1, 2):
     loss = decoder(images, text = text, unet_number = unet_number) # this can optionally be decoder(images, text) if you wish to condition on the text encodings as well, though it was hinted in the paper it didn't do much
