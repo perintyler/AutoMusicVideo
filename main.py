@@ -1,4 +1,6 @@
+"""main.py"""
 
+import os
 import json
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,6 +22,10 @@ MODEL_EXISTS = False
 NET1_STATE_FILEPATH = "./models/nn1.pth"
 
 NET2_STATE_FILEPATH = "./models/nn2.pth"
+
+NUM_TRAINING_ITERATIONS = 100
+
+VERBOSE = True
 
 # ----------------------------------------------------------------
 # ----------------------------------------------------------------
@@ -85,18 +91,25 @@ decoder = Decoder(
 # ----------------------------------------------------------------
 # ----------------------------------------------------------------
 
+def vprint(msg):
+  """verbose printing"""
+  if (VERBOSE):
+    print(msg)
+
 def train():
   """"""
   def train_diffision_model():
-    print('training diffusion model')
-    loss = diffusion_prior(text, images)
-    loss.backward()
+    vprint('training diffusion model')
+    for i in range(NUM_TRAINING_ITERATIONS):
+      loss = diffusion_prior(text, images)
+      loss.backward()
 
   def train_unets():
-    print('training unets')
-    for unet_number in (1, 2):
-      loss = decoder(images, text = text, unet_number = unet_number) # this can optionally be decoder(images, text) if you wish to condition on the text encodings as well, though it was hinted in the paper it didn't do much
-      loss.backward()
+    vprint('training unets')
+    for i in range(NUM_TRAINING_ITERATIONS):
+      for unet_number in (1, 2):
+        loss = decoder(images, text = text, unet_number = unet_number) # this can optionally be decoder(images, text) if you wish to condition on the text encodings as well, though it was hinted in the paper it didn't do much
+        loss.backward()
 
   train_diffision_model()
   train_unets()
@@ -111,13 +124,13 @@ def save_state_to_json():
 
 def save_models():
   """"""
-  print(f'saving models to {NET1_STATE_FILEPATH} and {NET2_STATE_FILEPATH}')
+  vprint(f'saving models to {NET1_STATE_FILEPATH} and {NET2_STATE_FILEPATH}')
   torch.save(unet1.state_dict(), NET1_STATE_FILEPATH)
   torch.save(unet2.state_dict(), NET2_STATE_FILEPATH)
 
 def generate_images(saveToFile=True):
   """"""
-  print(f'generating images for input: {TEXT_INPUT}')
+  vprint(f'generating images for input: {TEXT_INPUT}')
   dalle2 = DALLE2(
     prior = diffusion_prior,
     decoder = decoder
@@ -129,8 +142,13 @@ def generate_images(saveToFile=True):
     return_pil_images = True
   )
 
+  vprint(f'Successfully generated {len(images)} images')
+
   if saveToFile: # save your image (in this example, of size 256x256)
-    plt.imsave("images/dalle2_output.png", images[0]) # finally save your prediction .
+    numImages = len(list(filter(lambda fn: fn.endswith('.png'), os.listdir('images'))))
+    for image, i in enumerate(images):
+      imageNumber = numImages + i + 1
+      plt.imsave(f"images/dalle2-output-{imageNumber}.png", image) # finally save your prediction .
 
   return images
 
@@ -138,5 +156,6 @@ if __name__ == '__main__':
   train()
   save_models()
   generate_images()
+  # print(f'\n\nLOSS = {loss}\n\n')
 
 
