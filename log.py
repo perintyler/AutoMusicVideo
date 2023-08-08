@@ -23,12 +23,12 @@ def header(title):
   print(f"\n{headerDivider}\n{indent}{header}\n{headerDivider}\n")
 
 def divider():
-  print('\n\n\n')
+  print('\n')
   print('-'*128)
-  print('\\'*64 + '/'*64)
   print('/'*64 + '\\'*64)
+  print('\\'*64 + '/'*64)
   print('-'*128)
-  print('\n\n\n')
+  print('')
 
 def save_all():
   if VERBOSE: header(f'saving logs to {LOGFILE_NAME}')
