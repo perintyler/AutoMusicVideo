@@ -2,23 +2,24 @@
 
 import pathlib
 import os
-from transcriptions import Transcription
+from lyrics import Lyrics
 
-transcription1 = Transcription.load('test-data/audio/something-beatles_verse1.wav')
+lyrics1 = Lyrics.load('test-data/audio/something-beatles_verse1.wav')
 
 def test_get_bars():
-  assert transcription1.get_bars() == [
+  assert [bar.text for bar in lyrics1.get_bars()] == [
     "Something in the way she moves attracts me like no other lover",
     "Something in the way she moves me"
   ]
 
 def test_get_lyrics():
-  assert transcription1.get_lyrics() \
-      == "Something in the way she moves attracts me like no other lover\nSomething in the way she moves me"
+  assert lyrics1.get_plaintext() == \
+"""Something in the way she moves attracts me like no other lover
+Something in the way she moves me"""
 
 def test_srt_file_generation():
   srt_filepath = '/tmp/subtitle-test.srt'
-  transcription1.save_as_srt(outfile=srt_filepath)
+  lyrics1.save_as_srt(outfile=srt_filepath)
   assert os.path.exists(srt_filepath)
   with open(srt_filepath) as srt_file:
     assert srt_file.read() == \

@@ -9,22 +9,31 @@ from typing import List, Dict
 from dataclasses import dataclass
 
 @dataclass
-class Transcription:
-  """lyrics with timestamps"""
+class Bar:
+  """a timestamped line of lyrics"""
+  text: str
+  timestamp: float
+
+@dataclass
+class Lyrics:
+  """audio transcriptions with timestamps"""
 
   segments: List[Dict] 
 
-  def get_bars(self) -> List[str]:
-    """
-    returns a list where each element is one line of lyrics
-    """
-    return [segment['text'].strip() for segment in self.segments]
+  def get_bars(self) -> List[Bar]:
+    """..."""
+    bars = []
+    for segment in self.segments:
+      line_of_lyrics = segment['text'].strip()
+      timestamp = segment['start']
+      bars.append(Bar(line_of_lyrics, timestamp))
+    return bars
 
-  def get_lyrics(self) -> str:
+  def get_plaintext(self) -> str:
     """
     returns all lyrics as a single string
     """ 
-    return '\n'.join(self.get_bars())
+    return '\n'.join(bar.text for bar in self.get_bars())
 
   def save_as_srt(self, outfile):
     """
