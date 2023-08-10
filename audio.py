@@ -9,6 +9,7 @@ from typing import List
 class Audio:
   waveform: List[float]
   samplerate: int
+  filepath: str = None
 
   def save_as_wav(self, outfile, normalize_audio = False):
     """
@@ -20,4 +21,4 @@ class Audio:
   def load(Cls, filepath: pathlib.Path):
     """..."""
     waveform, samplerate = librosa.load(filepath)
-    return Cls(waveform, samplerate)
+    return Cls(waveform, samplerate, filepath=filepath)
