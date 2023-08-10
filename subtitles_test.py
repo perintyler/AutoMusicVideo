@@ -6,7 +6,7 @@ import subtitles
 
 def test_transcribe_something_by_beatles():
   # test transcriptions
-  testfile = 'test-data/something-beatles_verse1.wav'
+  testfile = 'test-data/audio/something-beatles_verse1.wav'
   transcription = subtitles.transcribe_audio(testfile)
   lyrics = ' '.join(segment['text'].strip() for segment in transcription['segments'])
   assert lyrics == "Something in the way she moves attracts me like no other lover Something in the way she moves me"

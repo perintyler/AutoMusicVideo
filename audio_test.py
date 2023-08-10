@@ -3,7 +3,7 @@ from audio import Audio
 import numpy as np
 
 def test_load_audio():
-  audio = Audio.load('test-data/something-beatles_verse1.wav')
+  audio = Audio.load('test-data/audio/something-beatles_verse1.wav')
   assert audio.waveform is not None
   assert type(audio.waveform) is np.ndarray
   assert len(audio.waveform) > 0
