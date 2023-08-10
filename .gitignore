@@ -5,3 +5,5 @@ images/
 models/
 __pycache__
 .pyc
+
+temp-images/
