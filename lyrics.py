@@ -26,6 +26,12 @@ class Bar:
       'end_time': self.end_time,
     }
 
+  def get_duration(self):
+    """
+    returns the amount of time elapsed (in seconds) between the start and end of the bar
+    """
+    return self.end_time - self.start_time
+
   @classmethod
   def from_json(Cls, json_bar):
     """
