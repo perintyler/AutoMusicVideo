@@ -10,6 +10,12 @@ class Audio:
   waveform: List[float]
   samplerate: int
 
+  def save_as_wav(self, outfile, normalize_audio = False):
+    """
+    writes the waveform to a WAV file
+    """
+    librosa.output.write_wav(self.waveform, self.samplerate, normalize = normalize_audio)
+
   @classmethod
   def load(Cls, filepath: pathlib.Path):
     """..."""
