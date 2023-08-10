@@ -4,11 +4,18 @@ import librosa
 
 import moviepy.editor as mp
 
-def create_video_from_gifs(infiles, outfile = None) -> mp.VideoFileClip:
-  gif_clips = map(mp.VideoFileClip, infiles)
-  combined_clip = mp.concatenate_videoclips(gif_clips)
+def create_video_from_gifs(infiles, outfile = None, gif_duration = None) -> mp.VideoFileClip:
+  gif_clips = [mp.VideoFileClip(path_to_gif) for path_to_gif in infiles]
+
+  if gif_duration is not None:
+    for clip in gif_clips:
+      clip.set_duration(gif_duration)
+
+  combined_clip = mp.concatenate_videoclips(gif_clips, method='compose')
+
   if outfile is not None:
-    combined_clip.write_videofile(outfile)
+    combined_clip.write_videofile(outfile, codec='mpeg4')
+
   return combined_clip
 
 def get_beat_timestamps(audio):
