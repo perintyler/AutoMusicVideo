@@ -17,6 +17,12 @@ class Audio:
     """
     librosa.output.write_wav(self.waveform, self.samplerate, normalize = normalize_audio)
 
+  def get_duration(self) -> float:
+    """
+    returns the length of the audio clip in seconds
+    """
+    return len(self.waveform) / self.samplerate
+
   @classmethod
   def load(Cls, filepath: pathlib.Path):
     """..."""
