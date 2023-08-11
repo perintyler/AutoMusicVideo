@@ -10,3 +10,6 @@ temp-images/
 
 pretrained/
 full-songs/
+music-videos/
+
+model.pth
