@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import List
 import pathlib
 
-from lyrics import Lyrics
+from lyrics import Lyrics, Bar
 
 @dataclass
 class MusicVideoSegment:
@@ -30,10 +30,10 @@ class MusicVideoSegment:
     assert self.is_complete()
     return self.path_to_multimedia.suffix
 
-  def __dict__(self):
+  def as_dict(self):
     return {
       'bar': self.bar.as_dict(),
-      'gif': str(self.path_to_multimedia)
+      'multimedia': None if self.path_to_multimedia is None else str(self.path_to_multimedia)
     }
 
 @dataclass
@@ -52,13 +52,11 @@ class MusicVideo:
         return False
     return True
 
-  def generate_incomplete_segments(self):
+  def get_incomplete_segments(self):
     """
     yields each incomplete `MusicVideoSegment`
     """
-    for segment in self.segments:
-      if not segment.is_complete():
-        yield segment
+    return [segment in self.segments if not segment.is_complete()]
 
   def add_multimedia(self, line_number, filepath):
     """
@@ -85,7 +83,7 @@ class MusicVideo:
     }
 
     with open(outfile, 'w') as lyrics_json_file:
-      json.dump(json_contents, lyrics_json_file)
+      json.dump(json_contents, lyrics_json_file, indent=4)
 
     return json_contents
 
@@ -107,10 +105,10 @@ class MusicVideo:
     with open(filepath, 'r') as json_file:
       json_contents = json.load(json_file)
 
-    for segment_json in json_contents:
+    for segment_json in json_contents['segments']:
       bar = Bar.from_json(segment_json['bar'])
-      path_to_gif = pathlib.Path(segment_json['gif'])
-      segment = MusicVideoSegment(bar, path_to_gif)
+      path_to_multimedia = None if segment_json['multimedia'] is None else pathlib.Path(segment_json['multimedia'])
+      segment = MusicVideoSegment(bar, path_to_multimedia)
       all_segments.append(segment)
 
     return Cls(all_segments, json_contents['source_file'])
