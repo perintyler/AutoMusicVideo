@@ -32,7 +32,7 @@ def main(path_to_song, song_name):
   for segment in music_video.get_incomplete_segments():
     line_number = segment.bar.line_number
     path_to_gif = os.path.join(multimedia_directory, f'{line_number}.json')
-    text_to_image.run_diffusion_model(segment.bar.text, path_to_gif)
+    text_to_image.generate_image(segment.bar.text)
     music_video.set_multimedia(line_number, path_to_gif)
     music_video.save_as_json(segments_json_file)
 
@@ -44,5 +44,6 @@ def main(path_to_song, song_name):
   music_video.compile(path_to_music_video)
 
 if __name__ == '__main__':
-  imagegen_legacy.train()
-  main('test-data/audio/something-beatles_verse1.mp3', 'something')
+  # imagegen_legacy.train()
+  main('full-songs/something_beatles.mp3', 'something2')
+  # main('test-data/audio/something-beatles_verse1.mp3', 'something')
