@@ -56,7 +56,7 @@ class MusicVideo:
     """
     yields each incomplete `MusicVideoSegment`
     """
-    return [segment in self.segments if not segment.is_complete()]
+    return [segment for segment in self.segments if not segment.is_complete()]
 
   def add_multimedia(self, line_number, filepath):
     """
