@@ -25,15 +25,15 @@ class Config:
 
     audio_file = config['audio_file']
     if not os.path.exists(audio_file):
-      raise InvalidConfig()
+      raise InvalidConfig(f"audio file does not exist: {audio_file}")
     if not audio_file.endswith('.mp3') and not audio_file.endswith('.wav'):
-      raise InvalidConfig()
+      raise InvalidConfig(f"audio file is not an mp3 or wav: {audio_file}")
 
     output_directory = config['output_directory']
     if not os.path.exists(output_directory):
       os.mkdir(output_directory)
     elif not os.path.isdir(output_directory):
-      raise InvalidConfig()
+      raise InvalidConfig(f"output directory is not a directory: {output_directory}")
 
     return Cls(audio_file, output_directory)
 
