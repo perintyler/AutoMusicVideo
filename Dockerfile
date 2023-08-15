@@ -16,7 +16,10 @@ ADD main.py /
 ADD lyrics.py /
 ADD music_video.py /
 ADD text_to_image.py /
+ADD config.py /
 
 ADD config.json /
+
+COPY songs .
 
 CMD ["python" , "main.py"]
