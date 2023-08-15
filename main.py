@@ -1,49 +1,85 @@
 """main.py"""
 
 import os
+import json
+import argparse
 
 from music_video import MusicVideo
-import text_to_image
+from text_to_image import generate_image
 
-def main(path_to_song, song_name):  
-  song_id = '-'.join(song_name.split(' '))
+def prompt_user_is_ready_to_generate_multimedia() -> bool:
+  """give the user a chance to stop the program and verify that lyrics are correct in the segments JSON file
+  """
+  prompt = 'Do you want to check that the lyrics were transcribed correctly before generating images? (y/n)'
+  return input(prompt) == 'y'
 
-  music_videos_directory = 'music-videos'
-  song_directory = os.path.join(music_videos_directory, song_id)
-  multimedia_directory = os.path.join(song_directory, 'multimedia')
+def prompt_user_is_ready_to_compile_segments() -> bool:
+  """give the user a chance to stop the program and verify that each segment's multimedia looks good
+  """
+  prompt = 'All multimedia for the video has been successfully generated. Are you ready to compile and save the final video? (y/n)'
+  return input(prompt) == 'y': 
 
-  for directory in (music_videos_directory, song_directory, multimedia_directory):
-    if not os.path.isdir(directory):
-      os.mkdir(directory)
+def main(audio_file, output_directory):
+  """Entry point for music video generation
 
-  segments_json_file = os.path.join(song_directory, f'segments.json')
+  This function can be run multiple times for a single music video generation. The user is prompted 
+  inbetween steps, giving him/her a chance to verify lyrics or the multimedia that corresponds to those
+  lyrics. Progress is saved in the `segments.json` file, as well as the `multimedia` directory, so 
+  for each run, this function will load any completed progress and continue from there.
+  """
 
-  if os.path.exists(segments_json_file):
-    music_video = MusicVideo.load_from_json(segments_json_file)
+  ###
+  # STEP 1: setup directories (if needed)
+  ###
+
+  if not os.path.exists(output_directory):
+    os.mkdir(output_directory)
+
+  multimedia_directory = os.path.join(output_directory, 'multimedia')
+  if not os.path.exists(multimedia_directory):
+    os.mkdir(multimedia_directory)
+
+  ###
+  # STEP 2: generate or load segments
+  ###
+
+  segments_file = os.path.join(output_directory, 'segments.json')
+
+  if os.path.exists(segments_file):
+    # segments file has already been created. create the music video object
+    # by loading it from the existing segments file 
+    music_video = MusicVideo.load_from_json(segments_file)
+
   else:
+    # segments file has not been created. Create a new music video 
+    # object save the incomplete segments to a JSON file
     music_video = MusicVideo.create_new(path_to_song)
+    music_video.save_as_json(segments_file)
+
+  if not prompt_user_is_ready_to_generate_multimedia(): return
+
+  ###
+  # STEP 3: generate multimedia for any incomplete segment (i.e. segment is missing multimedia)
+  ###
+
+  for segment in music_video.get_incomplete_segments()
+    path_to_multimedia = os.path.join(output_directory, 'multimedia', segment.bar.line_number)
+    generate_image(segment.bar.text, output_file)
+    music_video.set_multimedia(line_number, output_file)
     music_video.save_as_json(segments_json_file)
 
-    if input(f'A segments file has been created at {segments_json_file}.'
-          + 'Do you want to check that the lyrics were transcribed correctly '
-          + 'before generating images? (y/n)'
-    ) == 'y': return
+  if not prompt_user_is_ready_to_compile_segments(): return
 
-  for segment in music_video.get_incomplete_segments():
-    line_number = segment.bar.line_number
-    path_to_gif = os.path.join(multimedia_directory, f'{line_number}.json')
-    text_to_image.generate_image(segment.bar.text)
-    music_video.set_multimedia(line_number, path_to_gif)
-    music_video.save_as_json(segments_json_file)
+  ###
+  # STEP 4: compile the final mp4 file using the now completed segments
+  ###
 
-  if input(f'All multimedia for the video has been successfully generated.'
-        + 'Are you ready to compile and save the final video? (y/n)'
-  ) != 'y': return
-
-  path_to_music_video = os.path.join(song_directory, 'music-video.mp4')
+  path_to_music_video = os.path.join(output_directory, 'music-video.mp4')
   music_video.compile(path_to_music_video)
 
 if __name__ == '__main__':
-  # imagegen_legacy.train()
-  main('full-songs/something_beatles.mp3', 'something2')
-  # main('test-data/audio/something-beatles_verse1.mp3', 'something')
+  parser = argparse.ArgumentParser()
+  parser.add_argument('--audio-file', required=True)
+  parser.add_argument('--output-directory', required=True)
+  args = parser.parse_args()
+  main(args.audio_file, args.output_directory)
