@@ -72,7 +72,7 @@ def main(audio_file, output_directory):
   ###
 
   for segment in music_video.get_incomplete_segments():
-    multimedia_directory = os.path.join(output_directory, 'multimedia', segment.bar.line_number)
+    multimedia_directory = os.path.join(output_directory, 'multimedia', f'line-{segment.bar.line_number}')
     if not os.path.exists(multimedia_directory): os.mkdir(multimedia_directory)
     text_to_image(segment.bar.text, multimedia_directory)
     music_video.set_multimedia(line_number, output_file)
