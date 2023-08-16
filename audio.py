@@ -7,6 +7,9 @@ from typing import List
 
 @dataclass
 class Audio:
+  """lightweight class to encapsulate an audio's waveform and samplerate 
+  """
+  
   waveform: List[float]
   samplerate: int
   filepath: str = None
