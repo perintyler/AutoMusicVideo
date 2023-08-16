@@ -14,3 +14,7 @@ def print_divider():
   print('\\'*64 + '/'*64)
   print('-'*128)
   print('')
+
+def print_bullet(message):
+  print (f'    - {message}')
+  
