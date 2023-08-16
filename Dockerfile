@@ -1,25 +1,11 @@
-# syntax=docker/dockerfile:1
+FROM python:3.8.16-slim
 
-ARG PYTHON_VERSION=3.8.16
-FROM python:${PYTHON_VERSION}-slim as base
+WORKDIR /lyrics-to-text
+COPY . /lyrics-to-text
 
-# Prevents Python from writing pyc files.
-ENV PYTHONDONTWRITEBYTECODE=1
-
-
-ADD requirements.txt /
-
+RUN apt-get update -qq && apt-get install ffmpeg -y
+RUN python -m pip install —upgrade pip
 RUN python -m pip install -r requirements.txt
 
-ADD audio.py /
-ADD main.py /
-ADD lyrics.py /
-ADD music_video.py /
-ADD text_to_image.py /
-ADD config.py /
-
-ADD config.json /
-
-COPY songs .
-
-CMD ["python" , "main.py"]
+ENTRYPOINT ["python3"]
+CMD ["python3", "main.py"]
