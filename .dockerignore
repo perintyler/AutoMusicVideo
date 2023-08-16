@@ -45,6 +45,7 @@ temp-images/
 
 pretrained/
 full-songs/
-music-videos/
-
-*.pth
+images/
+test-data/
+notes.md
+todo/
