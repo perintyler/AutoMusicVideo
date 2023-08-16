@@ -20,7 +20,7 @@ import torchvision.transforms as T
 
 from tqdm import trange, tqdm
 
-from .clip import load, tokenize
+from deepdaze_clip import load, tokenize
 
 
 # Helpers

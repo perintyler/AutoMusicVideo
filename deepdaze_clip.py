@@ -22,7 +22,7 @@ _MODELS = {
     "ViT-L/14": "https://openaipublic.azureedge.net/clip/models/b8cca3fd41ae0c99ba7e8951adf17d267cdb84cd88be6f7c2e0eca1737a03836/ViT-L-14.pt"
 }
 
-def _download(url: str, root: str = os.path.expanduser("~/.cache/clip")):
+def _download(url: str, root: str = os.path.expanduser("model")):
     os.makedirs(root, exist_ok=True)
     filename = os.path.basename(url)
 
@@ -625,7 +625,7 @@ import regex as re
 
 @lru_cache()
 def default_bpe():
-    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/bpe_simple_vocab_16e6.txt")
+    return "deepdaze-data/bpe_simple_vocab_16e6.txt"
 
 
 @lru_cache()
