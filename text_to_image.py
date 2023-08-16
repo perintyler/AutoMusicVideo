@@ -1,10 +1,12 @@
 """imagegen.py"""
 
 import os
-from deep_daze import Imagine
+from deepdaze import Imagine
 from lyrics import Bar
 
 MODEL_NAME = 'ViT-B/32' # 'ViT-L/14'
+
+SAVE_EVERY = 1
 
 def text_to_image(text_input, output_directory):
   """
@@ -15,7 +17,7 @@ def text_to_image(text_input, output_directory):
       model_name = MODEL_NAME,
       text = text_input,
       num_layers = 24,
-      save_every = 64,
+      save_every = SAVE_EVERY,
       save_progress = True,
       save_date_time = True,
       save_gif=True,
