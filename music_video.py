@@ -1,4 +1,6 @@
+"""music_video.py"""
 
+import os
 import json
 from dataclasses import dataclass
 from typing import List
@@ -11,7 +13,7 @@ class MusicVideoSegment:
   """..."""
 
   bar: Bar
-  path_to_multimedia: pathlib.Path = None
+  multimedia: pathlib.Path = None
 
   def is_complete(self):
     """
@@ -21,19 +23,19 @@ class MusicVideoSegment:
   def set_multimedia(self, filepath):
     """
     """
-    self.path_to_multimedia = filepath if isinstance(filepath, pathlib.Path) else pathlib.Path(filepath)
+    self.multimedia = filepath if isinstance(filepath, pathlib.Path) else pathlib.Path(filepath)
 
   def get_multimedia_type(self):
     """
     returns the extension of the segment's multimedia file
     """
     assert self.is_complete()
-    return self.path_to_multimedia.suffix
+    return self.multimedia.suffix
 
   def as_dict(self):
     return {
       'bar': self.bar.as_dict(),
-      'multimedia': None if self.path_to_multimedia is None else str(self.path_to_multimedia)
+      'multimedia': None if self.multimedia is None else str(self.multimedia)
     }
 
 @dataclass
@@ -44,8 +46,7 @@ class MusicVideo:
   source_file: str
 
   def is_complete(self):
-    """
-    ...
+    """a segment is complete if it a multimedia file exists for the segment's lyrics
     """
     for segment in self.segments:
       if not segment.is_complete():
@@ -53,14 +54,12 @@ class MusicVideo:
     return True
 
   def get_incomplete_segments(self):
-    """
-    yields each incomplete `MusicVideoSegment`
+    """yields each incomplete `MusicVideoSegment`
     """
     return [segment for segment in self.segments if not segment.is_complete()]
 
   def add_multimedia(self, line_number, filepath):
-    """
-    sets the multimedia path for given line number's `MusicVideoSegment`
+    """sets the multimedia path for given line number's `MusicVideoSegment`
 
     Note: if the segment is already complete (i.e. already has multimedia), the existing
           multimedia is replaced.
@@ -68,12 +67,11 @@ class MusicVideo:
     assert line_number > 0
     segment_index = line_number - 1
     segment = self.segments[segment_index]
-    assert segment.line_number == line_number
+    assert segment.bar.line_number == line_number
     segment.set_multimedia(filepath)
 
   def save_as_json(self, outfile):
-    """
-    serializes all bars and their corresponding multimedia (if the multimedia exists)
+    """serializes all bars and their corresponding multimedia (if the multimedia exists)
     """
     assert outfile.endswith('.json')
 
@@ -88,8 +86,7 @@ class MusicVideo:
     return json_contents
 
   def compile(self):
-    """
-    stitches together the multimedia of each `MusicVideoSegment`, overlays the audio,
+    """stitches together the multimedia of each `MusicVideoSegment`, overlays the audio,
     and saves the final results to an mp4 file
     """
     assert self.is_complete()
@@ -97,10 +94,11 @@ class MusicVideo:
 
   @classmethod
   def load_from_json(Cls, filepath):
-    """
-    ...
+    """creates and returns an instance of `MusicVideo` using a segments JSON file (see README)
     """
     all_segments = []
+
+    assert os.path.exists(filepath)
 
     with open(filepath, 'r') as json_file:
       json_contents = json.load(json_file)
@@ -115,6 +113,8 @@ class MusicVideo:
 
   @classmethod
   def create_new(Cls, path_to_song):
+    """...
+    """
     lyrics = Lyrics.load_from_audio(path_to_song)
     segments = [MusicVideoSegment(bar) for bar in lyrics.bars]
     return Cls(segments, lyrics.source_file)

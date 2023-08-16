@@ -81,14 +81,12 @@ class Lyrics:
 
   @classmethod
   def load_from_audio(Cls, filepath):
+    """creates a new instance of `Lyrics` by transcribing lyrics with OpenAI's whisper library 
     """
-    creates a new instance of `Lyrics` by transcribing lyrics with OpenAI's whisper library 
-    """
-    source_file = filepath
-    model = whisper.load_model("base")
+    transcription_model = whisper.load_model("base")
 
-    transcription = model.transcribe(audio=filepath, fp16=False)
+    transcription = transcription_model.transcribe(audio=filepath, fp16=False)
     bars = [Bar.from_json(segment) for segment in transcription['segments']]
 
-    return Cls(bars, source_file)
+    return Cls(bars, filepath)
 
