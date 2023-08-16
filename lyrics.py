@@ -79,31 +79,6 @@ class Lyrics:
       'source_file': self.source_file, 
     }
 
-  # def save_as_json(self, outfile):
-  #   """
-  #   writes all encapsulated data to a JSON file, which can be loaded from file later on with `load_from_json`
-  #   """
-  #   assert outfile.endswith('.json')
-  #   json_contents = self.as_dict()
-
-  #   with open(outfile, 'w') as lyrics_json_file:
-  #     json.dump(json_contents, lyrics_json_file)
-
-  #   return json_contents
-
-  # @classmethod
-  # def load_from_json(Cls, filepath):
-  #   """
-  #   creates a new instance of `Lyrics` using a JSON file created by the `save_as_json` function
-  #   """
-  #   with open(filepath, 'r') as lyrics_json_file:
-  #     json_contents = json.load(lyrics_json_file)
-
-  #   source_file = json_contents['source_file']
-  #   bars = [Bar.from_json(bar_json) for bar_json in json_contents['bars']]
-
-  #   return Cls(bars, source_file)
-
   @classmethod
   def load_from_audio(Cls, filepath):
     """
