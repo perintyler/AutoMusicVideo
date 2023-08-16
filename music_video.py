@@ -18,7 +18,7 @@ class MusicVideoSegment:
   def is_complete(self):
     """
     """
-    return self.path_to_multimedia is not None
+    return self.multimedia is not None
 
   def set_multimedia(self, filepath):
     """
