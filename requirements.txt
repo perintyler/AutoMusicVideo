@@ -4,7 +4,6 @@ certifi==2023.7.22
 cffi==1.15.1
 charset-normalizer==3.2.0
 decorator==5.1.1
-deep-daze==0.11.1
 einops==0.6.1
 ffmpeg==1.4
 ffmpeg-python==0.2.0
