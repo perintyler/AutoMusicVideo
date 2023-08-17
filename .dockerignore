@@ -32,6 +32,9 @@
 **/values.dev.yaml
 LICENSE
 README.md
+.DS_Store
+.dockerignore
+compose.yaml
 
 notes.md
 env/
@@ -49,3 +52,5 @@ images/
 test-data/
 notes.md
 todo/
+test-data/
+scripts/
