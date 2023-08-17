@@ -15,6 +15,5 @@ music-videos/
 *.pth
 model/
 
-deepdaze-data/
 config.json
 .pytest_cache/
