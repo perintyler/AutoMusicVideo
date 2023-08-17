@@ -1,25 +1,26 @@
 #!/bin/bash
 
-clear
-
 REGION="us-west2";
 
-ARTIFACTS_REGISTRY_REPO_NAME="quickstart-docker-repo";
+REPOSITORY_NAME="quickstart-docker-repo";
 
-GCP_PROJECT_ID=`gcloud config get-value project`
+GCP_PROJECT_ID=`gcloud config get-value project`;
 
-if [ -n $IMAGE_NAME ]; then
-  IMAGE_NAME="auto-music-video"
+# the image name can be set with a:
+# - cli args (e.g. `./scripts/cloud-build.sh "my-image:my-tag"`)
+# - by setting the environment variable $DOCKER_IMAGE_TAG
+# - using the default value
+if [ -n "$1" ]; then
+  DOCKER_IMAGE_NAME="$1";
+elif [ -n "$DOCKER_IMAGE_NAME" ]; then
+  DOCKER_IMAGE_NAME="$GCP_PROJECT_ID:last-build";
 fi
 
-if [ -n $IMAGE_NAME ]; then
-  IMAGE_TAG="tag1"
-fi
+IMAGE_URL="$REGION-docker.pkg.dev/$GCP_PROJECT_ID/$REPOSITORY_NAME/$DOCKER_IMAGE_NAME";
 
-IMAGE_URI="$REGION-docker.pkg.dev"
+clear && printf '\33c\e[3J'; # clear scrollback
+echo "building and pushing '$DOCKER_IMAGE_NAME' to GCP for project '$GCP_PROJECT_ID'";
+echo "Image URL: $IMAGE_URL";
 
-BUILD_ID="$IMAGE_NAME:$IMAGE_TAG"
-
-IMAGE_PATH=$IMAGE_URI/$GCP_PROJECT_ID/$ARTIFACTS_REGISTRY_REPO_NAME/$BUILD_ID
-
-gcloud builds submit --region=$REGION --tag $IMAGE_PATH
+# build and push
+gcloud builds submit --region=$REGION --tag $IMAGE_URL;
