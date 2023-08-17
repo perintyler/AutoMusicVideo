@@ -9,7 +9,7 @@ __pycache__
 temp-images/
 
 pretrained/
-full-songs/
+songs/
 music-videos/
 
 *.pth
