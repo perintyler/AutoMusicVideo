@@ -1,11 +1,14 @@
 FROM python:3.8.16-slim
 
-WORKDIR /lyrics-to-text
-COPY . /lyrics-to-text
+RUN python3.8 -m venv env
+RUN . env/bin/activate
+ADD requirements.txt /
+RUN python -m pip install -r requirements.txt
+RUN rm requirements.txt
 
 RUN apt-get update -qq && apt-get install ffmpeg -y
-RUN python -m pip install —upgrade pip
-RUN python -m pip install -r requirements.txt
 
-ENTRYPOINT ["python3"]
-CMD ["python3", "main.py"]
+COPY . /lyrics-to-text
+WORKDIR /lyrics-to-text
+
+CMD ["python", "main.py"]
