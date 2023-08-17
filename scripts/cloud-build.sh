@@ -1,7 +1,23 @@
 #!/bin/bash
 
-if [ -n $GCP_PROJECT_ID ]; then
-    gcloud builds submit --region=us-west2 --tag us-west2-docker.pkg.dev/$GCP_PROJECT_ID/quickstart-docker-repo/quickstart-image:tag1
-else
-  echo "set the 'GCP_PROJECT_ID' enviroment variable"
+REGION="us-west2";
+
+ARTIFACTS_REGISTRY_REPO_NAME="quickstart-docker-repo";
+
+GCP_PROJECT_ID="lyrics-to-text-dev1";
+
+if [ -n $IMAGE_NAME ]; then
+  IMAGE_NAME="auto-music-video"
 fi
+
+if [ -n $IMAGE_NAME ]; then
+  IMAGE_TAG="tag1"
+fi
+
+IMAGE_URI="$REGION-docker.pkg.dev"
+
+BUILD_ID="$IMAGE_NAME:$IMAGE_TAG"
+
+IMAGE_PATH=$IMAGE_URI/$GCP_PROJECT_ID/$ARTIFACTS_REGISTRY_REPO_NAME/$BUILD_ID
+
+gcloud builds submit --region=$REGION --tag $IMAGE_PATH
