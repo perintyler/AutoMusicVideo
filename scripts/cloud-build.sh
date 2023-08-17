@@ -11,15 +11,15 @@ GCP_PROJECT_ID=`gcloud config get-value project`;
 # - by setting the environment variable $DOCKER_IMAGE_TAG
 # - using the default value
 if [ -n "$1" ]; then
-  DOCKER_IMAGE_NAME="$1";
-elif [ -n "$DOCKER_IMAGE_NAME" ]; then
-  DOCKER_IMAGE_NAME="$GCP_PROJECT_ID:last-build";
+  IMAGE_NAME="$1";
+else [ -n "$DOCKER_IMAGE_NAME" ];
+  IMAGE_NAME="$GCP_PROJECT_ID:last-build";
 fi
 
-IMAGE_URL="$REGION-docker.pkg.dev/$GCP_PROJECT_ID/$REPOSITORY_NAME/$DOCKER_IMAGE_NAME";
+IMAGE_URL="$REGION-docker.pkg.dev/$GCP_PROJECT_ID/$REPOSITORY_NAME/$IMAGE_NAME";
 
 clear && printf '\33c\e[3J'; # clear scrollback
-echo "building and pushing '$DOCKER_IMAGE_NAME' to GCP for project '$GCP_PROJECT_ID'";
+echo "building and pushing '$IMAGE_NAME' to GCP for project '$GCP_PROJECT_ID'";
 echo "Image URL: $IMAGE_URL";
 
 # build and push
