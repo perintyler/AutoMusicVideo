@@ -1,10 +1,12 @@
 #!/bin/bash
 
+clear
+
 REGION="us-west2";
 
 ARTIFACTS_REGISTRY_REPO_NAME="quickstart-docker-repo";
 
-GCP_PROJECT_ID="lyrics-to-text-dev1";
+GCP_PROJECT_ID=`gcloud config get-value project`
 
 if [ -n $IMAGE_NAME ]; then
   IMAGE_NAME="auto-music-video"
