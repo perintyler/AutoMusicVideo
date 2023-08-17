@@ -17,3 +17,4 @@ model/
 
 deepdaze-data/
 config.json
+.pytest_cache/
