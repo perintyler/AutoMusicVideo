@@ -13,3 +13,6 @@ full-songs/
 music-videos/
 
 *.pth
+model/
+
+deepdaze-data/
