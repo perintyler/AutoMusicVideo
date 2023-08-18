@@ -9,9 +9,15 @@ import sys
 import re
 import argparse
 
-def combine_python_modules(filename):
+def combine_python_modules(filename, depth = 0):
   with open(filename, "r") as python_module:
     combined_source_code = python_module.read()
+
+  if depth != 0:
+    combined_source_code = combined_source_code.replace(
+      "if __name__ == '__main__':", 
+      "if __name__ == '__main__' and False:"
+    )
 
   import_statement_pattern = "from (\w+) import (.+)\n"
   matched_imports = re.findall(import_statement_pattern, combined_source_code)
@@ -22,7 +28,7 @@ def combine_python_modules(filename):
       import_statement = import_statement_pattern \
                         .replace("(\\w+)", imported_module) \
                         .replace("(.+)", imported_property)
-      module_source_code = combine_python_modules(path_to_module)
+      module_source_code = combine_python_modules(path_to_module, depth + 1)
       combined_source_code = combined_source_code.replace(import_statement, module_source_code)
 
   return combined_source_code
