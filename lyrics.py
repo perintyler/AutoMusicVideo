@@ -11,7 +11,10 @@ from dataclasses import dataclass, asdict
 
 @dataclass
 class Bar:
-  """a timestamped line of lyrics"""
+  """a timestamped line of lyrics
+
+  rename to lyric. get rid of Lyrics class
+  """
 
   text: str
   line_number: int
@@ -42,7 +45,10 @@ class Bar:
 
 @dataclass
 class Lyrics:
-  """audio transcriptions with timestamps"""
+  """audio transcriptions with timestamps
+
+  get rid of this class. maybe create a tiny module for saving a list of Lyric instances as srt
+  """
 
   bars: List[Bar]
   source_file: str
