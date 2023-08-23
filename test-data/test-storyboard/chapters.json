@@ -1,0 +1,32 @@
+{
+    "chapters": [
+        {
+            "bar": {
+                "text": "test lyric 1",
+                "line_number": 1,
+                "start_time": 0.0,
+                "end_time": 1.0
+            },
+            "multimedia": "test1.gif"
+        },
+        {
+            "bar": {
+                "text": "test lyric 2",
+                "line_number": 2,
+                "start_time": 1.0,
+                "end_time": 4.0
+            },
+            "multimedia": "test2.gif"
+        }
+        {
+            "bar": {
+                "text": "test lyric 3",
+                "line_number": 3,
+                "start_time": 4.0,
+                "end_time": 9.0
+            },
+            "multimedia": "test3.gif"
+        }
+    ],
+    "source_file": "audio/test1.mp3"
+}
