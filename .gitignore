@@ -9,12 +9,20 @@ __pycache__
 temp-images/
 
 pretrained/
+storyboards/
+collab-content/
 songs/
-music-videos/
 
 *.pth
 model/
 
-config.json
+/config.json
 .pytest_cache/
 AutoMusicVideo.zip
+
+.env
+service-keys/
+
+*.ipynb
+
+*-jobs.json
