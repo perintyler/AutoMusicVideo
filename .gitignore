@@ -26,3 +26,6 @@ service-keys/
 *.ipynb
 
 *-jobs.json
+gpc.env
+build/
+*.egg-info
