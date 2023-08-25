@@ -3,6 +3,8 @@
 
 FROM python:3.11-slim
 
+WORKDIR /AutoMusicVideo
+
 ################# copy source files #################
 
 
@@ -10,7 +12,8 @@ COPY ./storyboard /storyboard
 
 RUN ls -R /storyboard
 
-WORKDIR /AutoMusicVideo
+COPY ./input-audio /AutoMusicVideo
+COPY ./config.json /AutoMusicVideo
 
 ################# setup enviroment #################
 
@@ -29,7 +32,6 @@ RUN python -m pip install /storyboard
 # install ffmpeg with apt-get
 RUN apt-get update -qq 
 RUN apt-get install ffmpeg -y
-
 
 ################# define entry point command #################
 
