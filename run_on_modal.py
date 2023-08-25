@@ -4,7 +4,12 @@ import sys
 import subprocess
 import modal
 
-file_mount = modal.Mount.from_local_dir('storyboard', condition=lambda filepath: not filepath.endswith('__pycache__'))
+exclude = lambda filepath: not filepath.endswith('__pycache__') and not filepath.endswith('.pyc')
+
+file_mount = modal.Mount \
+            .from_local_dir('storyboard', condition=exclude) \
+            .add_local_dir('input-audio') \
+            .add_local_file('config.json')
 
 container_image = modal.Image.from_dockerfile('Dockerfile', context_mount=file_mount)
 
@@ -14,9 +19,9 @@ stub = modal.Stub("storyboard-creation")
 def create_storyboard(input_audio, output_directory):
   import storyboard
   print("This code is running on a remote worker!")
-  storyboard.create_storyboard(input_audio, output_directory)
+  storyboard.main(input_audio, output_directory)
 
 @stub.local_entrypoint()
 def main():
   print("Modal Entry Point")
-  create_storyboard.call('input-audio/something.mp3', 'storyboards/something-music-video')
+  create_storyboard.call('input-audio/something.mp3', 'something-music-video')
