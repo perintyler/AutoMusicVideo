@@ -2,7 +2,7 @@
 
 import pathlib
 import os
-from lyrics import Lyrics
+from .lyrics import Lyrics
 
 lyrics1 = Lyrics.load_from_audio('test-data/audio/something-beatles_verse1.wav')
 

@@ -1,0 +1,23 @@
+[project]
+name = "storyboard"
+version = "0.0.1"
+authors = [
+  { name="Tyler Perin", email="tyler@perin.email" },
+]
+description = "automatic music video generation"
+requires-python = ">=3.8"
+dynamic = ["dependencies"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.setuptools]
+package-dir = {"storyboard" = "src"}
+
+[tool.setuptools.package-data]
+"storyboard.data"= ["*.txt"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = { file = ["requirements-dev.txt"] }}

@@ -1,3 +1,9 @@
+"""deepdaze_clip.py
+
+This file was taken and modified from the deep-daze python backage by lucidrains.
+-> https://github.com/lucidrains/deep-daze
+"""
+
 from collections import OrderedDict
 from typing import Tuple, Union
 
@@ -5,6 +11,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from pathlib import Path
+from importlib.resources import files
 
 import hashlib
 import os
@@ -14,6 +21,8 @@ from typing import Union, List
 from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 
+PATH_TO_VOCAB_DATA = files('storyboard.data').joinpath('vocab-data.txt')
+
 _MODELS = {
     "RN50": "https://openaipublic.azureedge.net/clip/models/afeb0e10f9e5a86da6080e35cf09123aca3b358a0c3e3b6c78a7b63bc04b6762/RN50.pt",
     "RN101": "https://openaipublic.azureedge.net/clip/models/8fa8567bab74a42d41c5915025a8e4538c3bdbe8804a470a72f30b0d94fab599/RN101.pt",
@@ -22,7 +31,7 @@ _MODELS = {
     "ViT-L/14": "https://openaipublic.azureedge.net/clip/models/b8cca3fd41ae0c99ba7e8951adf17d267cdb84cd88be6f7c2e0eca1737a03836/ViT-L-14.pt"
 }
 
-def _download(url: str, root: str = os.path.expanduser("model")):
+def _download(url: str, root: str = os.path.expanduser("/tmp/model")):
     os.makedirs(root, exist_ok=True)
     filename = os.path.basename(url)
 
@@ -625,7 +634,7 @@ import regex as re
 
 @lru_cache()
 def default_bpe():
-    return "deepdaze-data/bpe_simple_vocab_16e6.txt"
+    return str(PATH_TO_VOCAB_DATA)
 
 
 @lru_cache()

@@ -44,14 +44,16 @@ models/
 __pycache__
 .pyc
 
-temp-images/
+.env
+service-keys/
 
 pretrained/
 full-songs/
 images/
-test-data/
 notes.md
 todo/
-test-data/
 scripts/
 AutoMusicVideo.zip
+gpc.env
+build/
+AutoMusicVideo.egg-info

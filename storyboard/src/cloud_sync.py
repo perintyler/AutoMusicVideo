@@ -1,11 +1,14 @@
 """cloud_sync.py"""
 
 import os
+import sys
 import json
 from pathlib import Path
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from google.cloud import storage
 from google.oauth2 import service_account
+
+from . import config
 
 PATH_TO_SERVICE_KEY = 'service-keys/bucket-service-key.json'
 
@@ -13,26 +16,15 @@ BUCKET_NAME = 'music-video-multimedia'
 
 OVERWRITE_EXISTING_FILES = False
 
-load_dotenv()
-
-PROJECT_ID = os.environ.get('STORAGE_SERVICE_PROJECT_ID')
-
-SERVICE_CREDENTIALS= {
-  'type': 'service_account',
-  "project_id": PROJECT_ID,
-  "private_key_id": os.environ.get('STORAGE_SERVICE_PRIVATE_KEY_ID'),
-  "private_key": os.environ.get('STORAGE_SERVICE_PRIVATE_KEY'),
-  "client_email": os.environ.get('STORAGE_SERVICE_CLIENT_EMAIL'),
-  "client_id": os.environ.get('STORAGE_SERVICE_CLIENT_ID'),
-  "auth_uri": os.environ.get('STORAGE_SERVICE_AUTH_URI'),
-  "token_uri": os.environ.get('STORAGE_SERVICE_TOKEN_URI')
-}
+EXIT_IF_NO_CREDENTIALS = False
 
 def _get_client():
   """
   """
-  credentials = service_account.Credentials.from_service_account_info(SERVICE_CREDENTIALS)
-  return storage.Client(project=PROJECT_ID, credentials=credentials)
+  gcp_project_id = config.get_gcp_project_id()
+  service_account_info = config.get_storage_service_account_info()
+  credentials = service_account.Credentials.from_service_account_info(service_account_info)
+  return storage.Client(project=gcp_project_id, credentials=credentials)
 
 def _upload_item(path_to_item, destination_directory, item_name, bucket_name = BUCKET_NAME):
   """
@@ -68,6 +60,14 @@ def _apply_gcp_updates_to_local_segments_file(path_to_segments_file, gcp_music_v
 def apply_local_updates_to_gcp(music_video_directory, bucket_name = BUCKET_NAME):
   """
   """
+  if not config.has_storage_service_account_info():
+    if EXIT_IF_NO_CREDENTIALS:
+      print('GCP service account does not exist. Exiting.')
+      sys.exit()
+    else:
+      print('GCP service account does not exist. Skipping cloud sync.')
+      return
+
   root_gcp_directory = Path(music_video_directory).name
 
   local_path_to_segments_file = os.path.join(music_video_directory, 'chapters.json')
@@ -95,10 +95,18 @@ def apply_local_updates_to_gcp(music_video_directory, bucket_name = BUCKET_NAME)
 def apply_gcp_updates_to_local(music_video_directory, bucket_name = BUCKET_NAME):
   """
   """
+  if not config.has_storage_service_account_info():
+    if EXIT_IF_NO_CREDENTIALS:
+      print('GCP service account does not exist. Exiting.')
+      sys.exit()
+    else:
+      print('GCP service account does not exist. Skipping cloud sync.')
+      return
+    
   if not os.path.exists(music_video_directory):
     os.mkdir(music_video_directory)
 
-  client = storage.Client.from_service_account_json(PATH_TO_SERVICE_KEY)
+  client = _get_client()
   bucket = client.get_bucket(bucket_name)
   root_gcp_directory = Path(music_video_directory).name
 

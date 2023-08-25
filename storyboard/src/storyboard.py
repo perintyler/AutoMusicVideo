@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import List
 import pathlib
 
-from lyrics import Lyrics, Bar
+from .lyrics import Lyrics, Bar
 
 @dataclass
 class StoryboardChapter:

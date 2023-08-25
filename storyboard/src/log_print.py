@@ -9,7 +9,7 @@ WRITE_LOGS_TO_FILE = True
 
 STORE_LOGS_ON_GCP = False
 
-LOG_DIRECTORY = 'logs'
+LOG_DIRECTORY = '../logs'
 
 LOG_FILENAME = f'logs-{datetime.now().strftime("%m-%d-%y_%H-%M-%S")}.txt'
 

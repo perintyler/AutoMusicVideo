@@ -1,3 +1,9 @@
+"""deepdaze.py
+
+This file was taken and modified from the deep-daze python backage by lucidrains.
+-> https://github.com/lucidrains/deep-daze
+"""
+
 import os
 import subprocess
 import sys
@@ -17,25 +23,23 @@ from PIL import Image
 from imageio import imread, mimsave
 import torchvision.transforms as T
 
-
 from tqdm import trange, tqdm
 
-from deepdaze_clip import load, tokenize
+from .deepdaze_clip import load, tokenize
 
+from .log_print import logprint_message
 
-# Helpers
+def log_print(message):
+    logprint_message(message, author='deepdaze')
 
 def exists(val):
     return val is not None
 
-
 def default(val, d):
     return val if exists(val) else d
 
-
 def interpolate(image, size):
     return F.interpolate(image, (size, size), mode='bilinear', align_corners=False)
-
 
 def rand_cutout(image, size, center_bias=False, center_focus=2):
     width = image.shape[-1]
@@ -306,7 +310,7 @@ class Imagine(nn.Module):
         if self.separator is not None and text is not None:
             #exit if text is just the separator
             if str(text).replace(' ','').replace(self.separator,'') == '':
-                print('Exiting because the text only consists of the separator! Needs words or phrases that are separated by the separator.')
+                log_print('Exiting because the text only consists of the separator! Needs words or phrases that are separated by the separator.')
                 exit()
             #adds a space to each separator and removes double spaces that might be generated
             text = text.replace(self.separator,self.separator+' ').replace('  ',' ').strip()
@@ -322,18 +326,18 @@ class Imagine(nn.Module):
             self.epochs = int(self.epochs) if int(self.epochs) == self.epochs else int(self.epochs) + 1
             if self.separator is not None:
                 if self.separator not in text:
-                    print("Separator '"+self.separator+"' will be ignored since not in text!")
+                    log_print("Separator '"+self.separator+"' will be ignored since not in text!")
                     self.separator = None
                 else:
                     self.epochs = len(list(filter(None,text.split(self.separator))))
-            print("Running for", self.epochs, "epochs" + (" (split with '"+self.separator+"' as the separator)" if self.separator is not None else ""))
+            log_print("Running for", self.epochs, "epochs" + (" (split with '"+self.separator+"' as the separator)" if self.separator is not None else ""))
         else: 
             self.epochs = epochs
 
         # jit models only compatible with version 1.7.1
         if "1.7.1" not in torch.__version__:
             if jit == True:
-                print("Setting jit to False because torch version is not 1.7.1.")
+                log_print("Setting jit to False because torch version is not 1.7.1.")
             jit = False
 
         # Load CLIP
@@ -473,7 +477,7 @@ class Imagine(nn.Module):
                     # remove first word
                     self.words = " ".join(self.words.split(" ")[1:])
         # get new encoding
-        print("Now thinking of: ", '"', self.words, '"')
+        log_print("Now thinking of: ", '"', self.words, '"')
         sequence_number = self.get_img_sequence_number(epoch, iteration)
         # save new words to disc
         with open("story_transitions.txt", "a") as f:
@@ -551,10 +555,10 @@ class Imagine(nn.Module):
 
         if self.save_video:
             mimsave(f'{self.textpath}.mp4', images)
-            print(f'Generated image generation animation at ./{self.textpath}.mp4')
+            log_print(f'Generated image generation animation at ./{self.textpath}.mp4')
         if self.save_gif:
             mimsave(f'{self.textpath}.gif', images)
-            print(f'Generated image generation animation at ./{self.textpath}.gif')
+            log_print(f'Generated image generation animation at ./{self.textpath}.gif')
 
     def forward(self):
         if exists(self.start_image):
@@ -570,7 +574,7 @@ class Imagine(nn.Module):
                     optim.step()
                     optim.zero_grad()
             except KeyboardInterrupt:
-                print('interrupted by keyboard, gracefully exiting')
+                log_print('interrupted by keyboard, gracefully exiting')
                 return exit()
 
             del self.start_image
@@ -599,7 +603,7 @@ class Imagine(nn.Module):
                 if self.create_story:
                     self.clip_encoding = self.update_story_encoding(epoch, i)
         except KeyboardInterrupt:
-            print('interrupted by keyboard, gracefully exiting')
+            log_print('interrupted by keyboard, gracefully exiting')
             return
 
         self.save_image(epoch, i) # one final save at end

@@ -1,32 +1,37 @@
 
 ################# set the base image #################
 
-FROM python:3.8-slim
+FROM python:3.11-slim
 
-################# install dependencies #################
+################# copy source files #################
 
-# set up a python virtual enviroment
-RUN python3.8 -m venv env
+
+COPY ./storyboard /storyboard
+
+RUN ls -R /storyboard
+
+WORKDIR /AutoMusicVideo
+
+################# setup enviroment #################
+
+RUN python3.11 -m venv env
 RUN . env/bin/activate
 
 # https://stackoverflow.com/questions/68673221/warning-running-pip-as-the-root-user
 ENV PIP_ROOT_USER_ACTION=ignore
 
+################# install dependencies #################
+
 # install pip packages listed in requirements file
 RUN python -m pip install --upgrade pip
-ADD requirements.txt /
-RUN python -m pip install -r requirements.txt
-RUN rm requirements.txt
+RUN python -m pip install /storyboard
 
 # install ffmpeg with apt-get
 RUN apt-get update -qq 
 RUN apt-get install ffmpeg -y
 
-################# copy source files #################
-
-COPY . /lyrics-to-text
-WORKDIR /lyrics-to-text
 
 ################# define entry point command #################
 
-CMD ["python", "main.py"]
+# COPY ./run_locally.py /AutoMusicVideo
+# CMD ["python", "run_locally.py"]
