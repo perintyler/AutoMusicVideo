@@ -3,6 +3,7 @@
 import os
 import json
 import argparse
+from pathlib import Path
 from .storyboard import Storyboard
 from .text_to_image import text_to_image
 from .log_print import logprint_header, logprint_bullet
@@ -108,20 +109,35 @@ def compile_music_video(storyboard_directory, path_to_music_video):
   # storyboard.compile(path_to_music_video)
   cloud_sync.apply_local_updates_to_gcp(storyboard_directory)
 
+def main(
+  audio_file = None, 
+  storyboard_directory = None,
+  config_file = None,
+  job_queue_file = None
+):
+  """
+  """
+  if audio_file:
+    storyboard_directory = storyboard_directory if storyboard_directory else str(Path(audio_file).stem)
+    create_storyboard(audio_file, storyboard_directory)
+  elif job_queue:
+    pass
+  elif config_file:
+    config = config.load_from_file(args.config)
+    create_storyboard(config.audio_file, config.storyboard_directory)
+  else:
+    audio_file = str(files('storyboard.data').joinpath('vocab-data.txt'))
+    create_storyboard(audio_file, storyboard_directory if storyboard_directory else 'test-music-video')
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--audio-file')
   parser.add_argument('--storyboard-directory')
-  parser.add_argument('-c', '--config', default='../config.json')
+  parser.add_argument('-c', '--config')
   args = parser.parse_args()
 
-  if args.audio_file and args.storyboard_directory:
-    audio_file = args.audio_file
-    storyboard_directory = args.storyboard_directory
-  else:
-    config = config.load_from_file(args.config)
-    audio_file = config.audio_file
-    storyboard_directory = config.storyboard_directory
-
-  create_storyboard(audio_file, storyboard_directory)
+  main(
+    audio_file=args.audio_file, 
+    storyboard_directory=args.storyboard_directory,
+    config=args.config
+  )
