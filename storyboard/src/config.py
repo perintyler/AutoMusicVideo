@@ -11,39 +11,34 @@ load_dotenv(find_dotenv())
 class InvalidConfig(Exception):
   """program input is invalid, refer to the config section in the README"""
 
-def get_absolute_path(relative_path):
-  return os.path.join(ROOT_PATH, relative_path)
-  
+def get_enviroment_variable(key):
+  """
+  """
+  if os.environ.get(key):
+    return os.environ.get(key)
+  elif os.environ[key]:
+    return os.environ[key]
+  else:
+    raise InvalidConfig(f'enviroment variable does not exist for "{key}"')
+
 def get_gcp_project_id():
   """
   """
-  project_id = os.environ.get('STORAGE_SERVICE_PROJECT_ID')
-
-  if project_id is None:
-    raise InvalidConfig('missing GCP project ID (environment file does not exist or is not configured properly)')
-
-  return project_id
+  return get_enviroment_variable('STORAGE_SERVICE_PROJECT_ID')
 
 def get_storage_service_account_info():
   """
   """
-  service_account_info = {
+  return {
     'type': 'service_account',
-    "project_id": os.environ.get('STORAGE_SERVICE_PROJECT_ID'),
-    "private_key_id": os.environ.get('STORAGE_SERVICE_PRIVATE_KEY_ID'),
-    "private_key": os.environ.get('STORAGE_SERVICE_PRIVATE_KEY'),
-    "client_email": os.environ.get('STORAGE_SERVICE_CLIENT_EMAIL'),
-    "client_id": os.environ.get('STORAGE_SERVICE_CLIENT_ID'),
-    "auth_uri": os.environ.get('STORAGE_SERVICE_AUTH_URI'),
-    "token_uri": os.environ.get('STORAGE_SERVICE_TOKEN_URI')
+    "project_id": get_enviroment_variable('STORAGE_SERVICE_PROJECT_ID'),
+    "private_key_id": get_enviroment_variable('STORAGE_SERVICE_PRIVATE_KEY_ID'),
+    "private_key": get_enviroment_variable('STORAGE_SERVICE_PRIVATE_KEY').replace('\\n', '\n'),
+    "client_email": get_enviroment_variable('STORAGE_SERVICE_CLIENT_EMAIL'),
+    "client_id": get_enviroment_variable('STORAGE_SERVICE_CLIENT_ID'),
+    "auth_uri": get_enviroment_variable('STORAGE_SERVICE_AUTH_URI'),
+    "token_uri": get_enviroment_variable('STORAGE_SERVICE_TOKEN_URI')
   }
-
-  if None in service_account_info.values():
-    raise InvalidConfig('missing GCP storage account info (environment file is not valid or does not exist)')
-  else:
-    service_account_info['private_key'] = service_account_info['private_key'].replace('\\n', '\n')
-
-  return service_account_info
 
 def has_storage_service_account_info():
   """
