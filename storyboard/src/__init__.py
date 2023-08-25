@@ -1,1 +1,1 @@
-from .main import create_storyboard
+from .main import main
