@@ -1,6 +1,4 @@
-#!/bin/bash
-
-REGION="us-west2";
+-REGION="us-west2";
 
 REPOSITORY_NAME="quickstart-docker-repo";
 

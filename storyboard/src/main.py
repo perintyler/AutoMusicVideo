@@ -15,8 +15,14 @@ USE_JOB_QUEUE = False
 
 COMPILE_VIDEO = False
 
-def create_storyboard(audio_file, storyboard_directory):
-  """Entry point for music video generation
+def storyboard_exists(video_id):
+  pass
+
+def create_storyboard(video_id, audio_file, storyboard_directory):
+ pass
+
+def generate_storyboard(audio_file, storyboard_directory):
+  """outlines the music video
 
   This function can be run multiple times for a single music video generation. The user is prompted 
   inbetween steps, giving him/her a chance to verify lyrics or the multimedia that corresponds to those
@@ -100,15 +106,6 @@ def create_storyboard(audio_file, storyboard_directory):
       logprint_bullet(f'new text-to-image job -> prompt = "{chapter.bar.text}" | output = {multimedia_directory}')
       job_queue.add_job(chapter.bar.text, multimedia_directory)
 
-def compile_music_video(storyboard_directory, path_to_music_video):
-  """
-  """
-  logprint_header("compiling final video")
-  chapters_file = os.path.join(storyboard_directory, 'chapters.json')
-  storyboard = Storyboard.load_from_json(chapters_file)
-  # storyboard.compile(path_to_music_video)
-  cloud_sync.apply_local_updates_to_gcp(storyboard_directory)
-
 def main(
   audio_file = None, 
   storyboard_directory = None,
@@ -119,15 +116,15 @@ def main(
   """
   if audio_file:
     storyboard_directory = storyboard_directory if storyboard_directory else str(Path(audio_file).stem)
-    create_storyboard(audio_file, storyboard_directory)
+    generate_storyboard(audio_file, storyboard_directory)
   elif job_queue:
     pass
   elif config_file:
     config = config.load_from_file(args.config)
-    create_storyboard(config.audio_file, config.storyboard_directory)
+    generate_storyboard(config.audio_file, config.storyboard_directory)
   else:
     audio_file = str(files('storyboard.data').joinpath('vocab-data.txt'))
-    create_storyboard(audio_file, storyboard_directory if storyboard_directory else 'test-music-video')
+    generate_storyboard(audio_file, storyboard_directory if storyboard_directory else 'test-music-video')
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()

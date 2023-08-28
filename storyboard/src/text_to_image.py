@@ -11,18 +11,23 @@ TIMESTAMP_GENERATED_FILES = False
 
 SAVE_EVERY = 1
 
-def generate_prompt(text_input, style):
+def generate_prompt(chapter):
   """TODO
   """
-  return f'{text_input} in the style of {style}' if style else text_input
+  text_input = chapter.bar.text
+  style = chapter.storyboard.video_style
+  if style is None:
+    return text_input
+  else:
+    return f'{text_input} in the style of {style}'
 
-def text_to_image(text_input, output_directory, style = None):
+def text_to_image(job, style = None):
   """
   ...
   """  
   imagine = Imagine(
       model_name = MODEL_NAME,
-      text = generate_prompt(text_input, style = style),
+      text = generate_prompt(chapter),
       num_layers = 24,
       save_every = SAVE_EVERY,
       save_progress = True,

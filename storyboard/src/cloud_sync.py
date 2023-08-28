@@ -9,6 +9,7 @@ from google.cloud import storage
 from google.oauth2 import service_account
 
 from . import config
+from log_print import logprint_bullet
 
 PATH_TO_SERVICE_KEY = 'service-keys/bucket-service-key.json'
 
@@ -33,8 +34,35 @@ def _upload_item(path_to_item, destination_directory, item_name, bucket_name = B
   bucket = client.get_bucket(bucket_name)
   path_to_blob = os.path.join(destination_directory, item_name)
   blob = bucket.blob(path_to_blob)
-  if not blob.exists(client) or OVERWRITE_EXISTING_FILES:
+  blob_exists = blob.exists(client)
+  if not blob_exists or OVERWRITE_EXISTING_FILES:
+    logprint_bullet(f'uploading {path_to_item} to GCP bucket "{bucket_name}" (overwrite={blob_exists})')
     blob.upload_from_filename(path_to_item)
+
+def download(cloud_path, local_path, bucket_name = BUCKET_NAME):
+  client = _get_client()
+  bucket = client.get_bucket(bucket_name)
+  blob = bucket.blob(cloud_path)
+  assert blob.exists()
+  blob.download_to_filename(local_path)
+
+def upload(local_path, cloud_path, overwrite = False, bucket_name = BUCKET_NAME):
+  client = _get_client()
+  bucket = client.get_bucket(bucket_name)
+  blob = bucket.blob(cloud_path)
+  if not blob.exists(client) or overwrite:
+    blob.upload_from_filename(cloud_path)
+
+def upload_chapter(chapter):
+  assert os.path.exists(chapter.local_path_to_multimedia)
+  upload(chapter.local_path_to_multimedia, chapter.cloud_path_to_multimedia)
+  download(
+    chapter.storyboard.get_cloud_path_to_json_file(), 
+    chapter.storyboard.get_local_path_to_json_file()
+  )
+
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
 
 def _apply_gcp_updates_to_local_segments_file(path_to_segments_file, gcp_music_video_directory):
   """
@@ -132,7 +160,54 @@ def apply_gcp_updates_to_local(music_video_directory, bucket_name = BUCKET_NAME)
     if not os.path.exists(local_path_to_multimedia_subdirectory):
       os.mkdir(local_path_to_multimedia_subdirectory)
     if not os.path.exists(local_path_to_multimedia):
+      logprint_bullet(f'downloading {local_path_to_multimedia} from GCP bucket "{bucket_name}"')
       blob.download_to_filename(local_path_to_multimedia)
+
+@dataclass
+class CloudSyncedObject:
+
+  cloud_filepath: Path
+  local_filepath: Path
+
+  def __init__(self, cloud_filepath, local_filepath, bucket):
+    self.cloud_filepath = cloud_filepath
+    self.local_filepath = local_filepath
+    self.bucket = bucket
+
+  def serialize(self):
+    """this needs to be implemented by the subclasses"""
+    pass
+
+  def save(self):
+    """
+    """
+    with open(self.local_filepath, 'w') as local_file:
+      if local_filepath.suffix == '.json':
+        json.dump(self.serialize(), local_file, indent=2)
+      else:
+        local_file.write(self.serialize())
+
+  def read(self):
+    """
+    """
+    with open(self.local_filepath, 'w') as local_file:
+      if self.local_filepath.suffix == '.json':
+        return json.load(local_file, indent=2)
+      else:
+        return local_file.read()
+
+  def upload(self):
+    self.save()
+    cloud_storage.upload(self.local_filepath, self.cloud_filepath, bucket=self.bucket)
+
+  def download(self):
+    cloud_storage.download(self.cloud_filepath, self.local_filepath, bucket=self.bucket)
+
+  def sync(self):
+    """
+    """
+    self.save()
+    self.upload()
 
 if __name__ == '__main__':
   apply_gcp_updates_to_local('music-videos/something-music-video')

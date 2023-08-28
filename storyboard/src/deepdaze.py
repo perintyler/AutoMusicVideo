@@ -291,7 +291,9 @@ class Imagine(nn.Module):
             hidden_size=256,
             save_gif=False,
             save_video=False,
-            output_folder=None
+            output_folder=None,
+            bucket_name=config.get_enviroment_variable('STORYBOARD_BUCKET_NAME'),
+            bucket_path=None
     ):
 
         super().__init__()

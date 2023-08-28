@@ -26,6 +26,11 @@ def get_gcp_project_id():
   """
   return get_enviroment_variable('STORAGE_SERVICE_PROJECT_ID')
 
+def get_storyboard_bucket_name():
+  """
+  """
+  return get_enviroment_variable('STORYBOARD_BUCKET')
+
 def get_storage_service_account_info():
   """
   """
