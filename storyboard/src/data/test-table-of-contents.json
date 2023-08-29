@@ -1,0 +1,215 @@
+{
+  "song_id": "test-song",
+  "video_style": null,
+  "path": "test-video/table-of-contents.json",
+  "bucket_name": "music-video-storyboards",
+  "chapters": [
+    {
+      "lyric": {
+        "text": "Something in the way she moves",
+        "line_number": 1,
+        "start_time": 0.0,
+        "end_time": 5.0
+      },
+      "multimedia": "test-video/chapter-1"
+    },
+    {
+      "lyric": {
+        "text": "A tracks me like no other lover",
+        "line_number": 2,
+        "start_time": 5.0,
+        "end_time": 11.0
+      },
+      "multimedia": "test-video/chapter-2"
+    },
+    {
+      "lyric": {
+        "text": "Something in the way she moves me",
+        "line_number": 3,
+        "start_time": 11.0,
+        "end_time": 17.0
+      },
+      "multimedia": "test-video/chapter-3"
+    },
+    {
+      "lyric": {
+        "text": "I don't wanna leave her now",
+        "line_number": 4,
+        "start_time": 17.0,
+        "end_time": 22.0
+      },
+      "multimedia": "test-video/chapter-4"
+    },
+    {
+      "lyric": {
+        "text": "You know I believe in how",
+        "line_number": 5,
+        "start_time": 22.0,
+        "end_time": 27.0
+      },
+      "multimedia": "test-video/chapter-5"
+    },
+    {
+      "lyric": {
+        "text": "So where in a smile she knows",
+        "line_number": 6,
+        "start_time": 27.0,
+        "end_time": 32.0
+      },
+      "multimedia": "test-video/chapter-6"
+    },
+    {
+      "lyric": {
+        "text": "But I don't need no other lover",
+        "line_number": 7,
+        "start_time": 32.0,
+        "end_time": 37.0
+      },
+      "multimedia": "test-video/chapter-7"
+    },
+    {
+      "lyric": {
+        "text": "So where in a smile she knows",
+        "line_number": 8,
+        "start_time": 38.0,
+        "end_time": 43.0
+      },
+      "multimedia": "test-video/chapter-8"
+    },
+    {
+      "lyric": {
+        "text": "But I don't need no other lover",
+        "line_number": 9,
+        "start_time": 46.0,
+        "end_time": 51.0
+      },
+      "multimedia": "test-video/chapter-9"
+    },
+    {
+      "lyric": {
+        "text": "Something in the style that shows me",
+        "line_number": 10,
+        "start_time": 53.0,
+        "end_time": 58.0
+      },
+      "multimedia": "test-video/chapter-10"
+    },
+    {
+      "lyric": {
+        "text": "But don't wanna leave her now",
+        "line_number": 11,
+        "start_time": 60.0,
+        "end_time": 63.0
+      },
+      "multimedia": "test-video/chapter-11"
+    },
+    {
+      "lyric": {
+        "text": "You know I believe in how",
+        "line_number": 12,
+        "start_time": 64.0,
+        "end_time": 68.0
+      },
+      "multimedia": "test-video/chapter-12"
+    },
+    {
+      "lyric": {
+        "text": "You're asking me when my lover grows",
+        "line_number": 13,
+        "start_time": 76.0,
+        "end_time": 80.0
+      },
+      "multimedia": "test-video/chapter-13"
+    },
+    {
+      "lyric": {
+        "text": "I don't know, I don't know",
+        "line_number": 14,
+        "start_time": 81.0,
+        "end_time": 86.0
+      },
+      "multimedia": "test-video/chapter-14"
+    },
+    {
+      "lyric": {
+        "text": "You stick around, now it's made sure",
+        "line_number": 15,
+        "start_time": 87.0,
+        "end_time": 92.0
+      },
+      "multimedia": "test-video/chapter-15"
+    },
+    {
+      "lyric": {
+        "text": "I don't know, I don't know",
+        "line_number": 16,
+        "start_time": 94.0,
+        "end_time": 99.0
+      },
+      "multimedia": "test-video/chapter-16"
+    },
+    {
+      "lyric": {
+        "text": "Something in the way she knows",
+        "line_number": 17,
+        "start_time": 117.0,
+        "end_time": 121.0
+      },
+      "multimedia": "test-video/chapter-17"
+    },
+    {
+      "lyric": {
+        "text": "Something in the way she knows",
+        "line_number": 18,
+        "start_time": 121.0,
+        "end_time": 126.0
+      },
+      "multimedia": "test-video/chapter-18"
+    },
+    {
+      "lyric": {
+        "text": "And all I have to do is think of her",
+        "line_number": 19,
+        "start_time": 142.0,
+        "end_time": 147.0
+      },
+      "multimedia": "test-video/chapter-19"
+    },
+    {
+      "lyric": {
+        "text": "Something in the thing she shows me",
+        "line_number": 20,
+        "start_time": 148.0,
+        "end_time": 154.0
+      },
+      "multimedia": "test-video/chapter-20"
+    },
+    {
+      "lyric": {
+        "text": "I don't wanna leave her now",
+        "line_number": 21,
+        "start_time": 155.0,
+        "end_time": 159.0
+      },
+      "multimedia": "test-video/chapter-21"
+    },
+    {
+      "lyric": {
+        "text": "You know I believe in how",
+        "line_number": 22,
+        "start_time": 159.0,
+        "end_time": 162.0
+      },
+      "multimedia": "test-video/chapter-22"
+    },
+    {
+      "lyric": {
+        "text": "You",
+        "line_number": 23,
+        "start_time": 177.0,
+        "end_time": 180.0
+      },
+      "multimedia": "test-video/chapter-23"
+    }
+  ]
+}
