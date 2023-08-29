@@ -13,7 +13,7 @@ classifiers = [
 ]
 
 [tool.setuptools]
-package-dir = {"storyboard" = "src"}
+package-dir = {"storyboard" = "storyboard"}
 
 [tool.setuptools.package-data]
 "storyboard.data"= ["*.txt"]

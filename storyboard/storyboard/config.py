@@ -8,6 +8,13 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
+DEFAULT_CONFIG = {
+  'VERBOSE': False,
+  'INPUT_AUDIO_BUCKET_NAME': 'music-video-audio',
+  'STORYBOARD_BUCKET_NAME': 'music-video-storyboards',
+  'LOG_BUCKET': 'music-video-storyboard-logs'
+}
+
 class InvalidConfig(Exception):
   """program input is invalid, refer to the config section in the README"""
 
@@ -16,20 +23,23 @@ def get_enviroment_variable(key):
   """
   if os.environ.get(key):
     return os.environ.get(key)
-  elif os.environ[key]:
-    return os.environ[key]
+  elif key in DEFAULT_CONFIG:
+    return DEFAULT_CONFIG[key]
   else:
     raise InvalidConfig(f'enviroment variable does not exist for "{key}"')
+
+def is_verbose():
+  return get_enviroment_variable('VERBOSE')
 
 def get_storyboard_bucket_name():
   """
   """
   return get_enviroment_variable('STORYBOARD_BUCKET_NAME')
 
-def get_audio_file_bucket_name():
+def get_input_audio_bucket_name():
   """
   """
-  return get_enviroment_variable('AUDIO_FILE_BUCKET_NAME')
+  return get_enviroment_variable('INPUT_AUDIO_BUCKET_NAME')
 
 def get_gcp_project_id():
   """

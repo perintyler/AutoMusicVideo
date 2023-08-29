@@ -47,12 +47,19 @@ def list_files(bucket_name, directory=None):
   bucket = client.get_bucket(bucket_name)
   return list(bucket.list_blobs(prefix=directory))
 
+def num_files(bucket_name, directory=None):
+  return len(list_files(bucket_name, directory=directory))
+
 def delete_file(cloud_path, bucket_name):
   client = _get_client()
   bucket = client.get_bucket(bucket_name)
   blob = bucket.blob(str(cloud_path))
   assert blob.exists()
   blob.delete()
+
+def delete_directory(cloud_path, bucket_name):
+  for blob in list_files(bucket_name, directory=cloud_path):
+    blob.delete()
 
 def upload_pil_image(pil_image, cloud_path, bucket_name, image_format='jpeg'):
   image_bytes = io.BytesIO()
@@ -88,5 +95,5 @@ def upload_file(local_path, cloud_path, bucket_name, overwrite = True):
   bucket = client.get_bucket(bucket_name)
   blob = bucket.blob(str(cloud_path))
   if not blob.exists(client) or overwrite:
-    blob.upload_from_filename(cloud_path)
+    blob.upload_from_filename(local_path)
 

@@ -25,9 +25,12 @@ import torchvision.transforms as T
 
 from tqdm import trange, tqdm
 
+from . import config
 from .deepdaze_clip import load, tokenize
 
 from .log_print import logprint_message
+
+from . import cloud_storage
 
 def log_print(message):
     logprint_message(message, author='deepdaze')
@@ -291,7 +294,8 @@ class Imagine(nn.Module):
             hidden_size=256,
             save_gif=False,
             save_video=False,
-            output_folder=None
+            output_folder=None,
+            bucket_name=None
     ):
 
         super().__init__()
@@ -395,6 +399,7 @@ class Imagine(nn.Module):
         self.image = img
         self.textpath = create_text_path(self.perceptor.context_length, text=text, img=img, encoding=clip_encoding, separator=story_separator)
         self.output_folder = str(output_folder)
+        self.bucket_name = bucket_name
         self.filename = self.image_output_path()
         
         # create coding to optimize for
@@ -415,6 +420,8 @@ class Imagine(nn.Module):
 
         self.save_gif = save_gif
         self.save_video = save_video
+
+        self.verbose = config.is_verbose()
             
     def create_clip_encoding(self, text=None, img=None, encoding=None):
         self.text = text
@@ -500,8 +507,9 @@ class Imagine(nn.Module):
         if self.save_date_time:
             current_time = datetime.now().strftime("%y%m%d-%H%M%S_%f")
             output_filename = f"{current_time}_{output_filename}"
+
         if self.output_folder:
-            if not os.path.exists(self.output_folder):
+            if not os.path.exists(self.output_folder) and not self.bucket_name:
                 tqdm.write(f"Creating output path {self.output_folder}")
                 os.makedirs(self.output_folder, exist_ok=True)
             output_path = Path(self.output_folder) / f"{output_filename}.jpg"
@@ -542,10 +550,14 @@ class Imagine(nn.Module):
         self.filename = self.image_output_path(sequence_number=sequence_number)
         
         pil_img = T.ToPILImage()(img.squeeze())
-        pil_img.save(self.filename, quality=95, subsampling=0)
-        pil_img.save(f"{self.textpath}.jpg", quality=95, subsampling=0)
 
-        tqdm.write(f'image updated at "./{str(self.filename)}"')
+        if self.bucket_name:
+            cloud_storage.upload_pil_image(pil_img, self.filename, self.bucket_name)
+            tqdm.write(f'image uploaded to bucket "{self.bucket_name}" at "./{str(self.filename)}"')
+        else:
+            pil_img.save(self.filename, quality=95, subsampling=0)
+            pil_img.save(f"{self.textpath}.jpg", quality=95, subsampling=0)
+            tqdm.write(f'image updated at "./{str(self.filename)}"')
 
     def generate_gif(self):
         images = []
@@ -555,10 +567,16 @@ class Imagine(nn.Module):
 
         if self.save_video:
             mimsave(f'{self.textpath}.mp4', images)
-            log_print(f'Generated image generation animation at ./{self.textpath}.mp4')
+            if self.verbose: log_print(f'Generated image generation animation at ./{self.textpath}.mp4')
         if self.save_gif:
-            mimsave(f'{self.textpath}.gif', images)
-            log_print(f'Generated image generation animation at ./{self.textpath}.gif')
+            path_to_gif = f'{self.textpath}.gif'
+            mimsave(path_to_gif, images)
+            cloud_storage.upload_file(
+                path_to_gif, 
+                os.path.join(self.output_folder, 'chapter.gif'), 
+                self.bucket_name
+            )
+            if self.verbose: log_print(f'Generated image generation animation at ./{self.textpath}.gif')
 
     def forward(self):
         if exists(self.start_image):
@@ -580,7 +598,7 @@ class Imagine(nn.Module):
             del self.start_image
             del optim
 
-        tqdm.write(f'Imagining "{self.textpath}" from the depths of my weights...')
+        if self.verbose: log_print(f'generating image for  "{self.textpath}" from the depths of my weights...')
 
         with torch.no_grad():
             self.model(self.clip_encoding, dry_run=True) # do one warmup step due to potential issue with CLIP and CUDA

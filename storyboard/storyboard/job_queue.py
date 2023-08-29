@@ -125,7 +125,7 @@ class StoryboardJobQueue:
   def has_idle_jobs(self):
     """
     """
-    return self.num_idle_jobs() == 0
+    return self.num_idle_jobs() > 0
 
   def next_job(self) -> StoryboardJob:
     """returns a job that hasn't been started, or None if there are no idle jobs

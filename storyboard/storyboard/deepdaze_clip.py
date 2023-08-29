@@ -21,8 +21,6 @@ from typing import Union, List
 from torchvision.transforms import Compose, Normalize
 from tqdm import tqdm
 
-PATH_TO_VOCAB_DATA = files('storyboard.data').joinpath('vocab-data.txt')
-
 _MODELS = {
     "RN50": "https://openaipublic.azureedge.net/clip/models/afeb0e10f9e5a86da6080e35cf09123aca3b358a0c3e3b6c78a7b63bc04b6762/RN50.pt",
     "RN101": "https://openaipublic.azureedge.net/clip/models/8fa8567bab74a42d41c5915025a8e4538c3bdbe8804a470a72f30b0d94fab599/RN101.pt",
@@ -634,7 +632,7 @@ import regex as re
 
 @lru_cache()
 def default_bpe():
-    return str(PATH_TO_VOCAB_DATA)
+    return str(files('storyboard.data').joinpath('vocab-data.txt'))
 
 
 @lru_cache()
