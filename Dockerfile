@@ -13,7 +13,6 @@ COPY ./storyboard /storyboard
 RUN ls -R /storyboard
 
 COPY ./input-audio /AutoMusicVideo
-COPY ./config.json /AutoMusicVideo
 
 ################# setup enviroment #################
 
