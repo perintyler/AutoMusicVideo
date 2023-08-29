@@ -12,7 +12,11 @@ COPY ./storyboard /storyboard
 
 RUN ls -R /storyboard
 
-COPY ./input-audio /AutoMusicVideo
+COPY ./input-audio /AutoMusicVideo/input-audio
+
+RUN ls -R /AutoMusicVideo
+
+WORKDIR /AutoMusicVideo
 
 ################# setup enviroment #################
 
