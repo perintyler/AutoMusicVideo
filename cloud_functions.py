@@ -1,4 +1,5 @@
 
+import modal
 import os
 import sys
 import pathlib
@@ -8,6 +9,11 @@ import asyncio
 import time
 
 INPUT_AUDIO_DIRECTORY = os.path.join('/AutoMusicVideo', 'input-audio')
+
+NUM_GPUS = 2
+T4 = modal.gpu.T4
+A100 = modal.gpu.A100
+GPU = modal.gpu.T4
 
 exclude = lambda filepath: not filepath.endswith('__pycache__') and not filepath.endswith('.pyc')
 
@@ -20,7 +26,7 @@ container_image = modal.Image.from_dockerfile('Dockerfile', context_mount=file_m
 stub = modal.Stub("storyboard-creation")
 
 @stub.function(
-  gpu="A100", 
+  gpu=GPU(count=NUM_GPUS),
   image=container_image, 
   secret=modal.Secret.from_name("gcp-storage-secrets"),
   timeout=60*60*24)
@@ -34,7 +40,7 @@ async def do_next_job(song_id):
     print('no jobs left')
 
 @stub.function(
-  gpu="A100", 
+  gpu=GPU(count=NUM_GPUS),
   image=container_image, 
   secret=modal.Secret.from_name("gcp-storage-secrets"),
   timeout=60*60*24)
