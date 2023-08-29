@@ -2,6 +2,7 @@
 
 import os
 from datetime import datetime
+from .config import is_verbose, is_production
 
 PRINT_TO_STDOUT = True
 
@@ -13,7 +14,8 @@ LOG_DIRECTORY = '../logs'
 
 LOG_FILENAME = f'logs-{datetime.now().strftime("%m-%d-%y_%H-%M-%S")}.txt'
 
-print(f'logging to {LOG_FILENAME}')
+if is_verbose() and not is_production():
+  print(f'logging to {LOG_FILENAME}')
 
 __logs__ = []
 
