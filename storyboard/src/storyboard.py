@@ -4,95 +4,126 @@ import os
 import json
 from dataclasses import dataclass
 from typing import List
-import pathlib
+from pathlib import Path
 
-from .lyrics import Lyrics, Bar
+from . import cloud_storage
+from . import config
+
+from .lyrics import Lyric
+
+BUCKET_NAME = config.get_storyboard_bucket_name()
 
 @dataclass
 class StoryboardChapter:
-  """rename to StoryboardChapter"""
+  """
+  """
 
-  bar: Bar
-  multimedia: pathlib.Path = None
+  song_id: str
+  style: str
+  lyric: Lyric
 
-  def is_complete(self):
-    """a chapter is complete if multimedia has been generated for the corresponding lyric
+  @property
+  def number(self) -> int:
+    """chapter number
     """
-    return self.multimedia is not None
+    return self.lyric.line_number
 
-  def get_multimedia_type(self):
-    """returns the file type of the chapter's multimedia
+  @property
+  def multimedia(self) -> Path:
+    """path to directory containing multimedia for the chapter
     """
-    return self.multimedia.suffix if self.is_complete() else None
+    return Path(self.song_id).joinpath(f'chapter-{self.number}')
 
-  def set_multimedia(self, filepath):
-    """set a path to a gif, image, or video to be displayed for this chapter
-    """
-    self.multimedia = filepath if isinstance(filepath, pathlib.Path) else pathlib.Path(filepath)
-
-  def as_dict(self):
+  def as_dict(self) -> dict:
     """serializes all chapter properties
     """
     return {
-      'bar': self.bar.as_dict(),
-      'multimedia': None if self.multimedia is None else str(self.multimedia)
+      'lyric': self.lyric.as_dict(),
+      'multimedia': str(self.multimedia),
     }
+
+  @classmethod
+  def from_json(Cls, song_id, style, json_chapter):
+    """
+    """
+    lyric = Lyric.from_json(json_chapter['lyric'])
+    return Cls(song_id, style, lyric)
 
 @dataclass
-class Storyboard:
-  """rename to storyboard"""
+class TableOfContents:
 
+  FILENAME = 'table-of-contents.json'
+
+  song_id: str
+  video_style: str
+  bucket_name: str
   chapters: List[StoryboardChapter]
-  source_file: str
 
-  def is_complete(self):
-    """a chapter is complete if it a multimedia file exists for the chapter's lyrics
+  def serialize(self):
     """
-    for chapter in self.chapters:
-      if not chapter.is_complete():
-        return False
-    return True
-
-  def save_as_json(self, outfile):
-    """serializes all bars and their corresponding multimedia (if the multimedia exists)
     """
-    assert outfile.endswith('.json')
-
-    json_contents = {
+    return {
+      'song_id': self.song_id,
+      'video_style': self.video_style,
+      'path': str(TableOfContents.path(self.song_id)),
+      'bucket_name': self.bucket_name,
       'chapters':  [chapter.as_dict() for chapter in self.chapters],
-      'source_file': self.source_file
     }
 
-    with open(outfile, 'w') as lyrics_json_file:
-      json.dump(json_contents, lyrics_json_file, indent=2)
+  def upload(self):
+    cloud_storage.upload_json(
+      self.serialize(), 
+      TableOfContents.path(self.song_id), 
+      self.bucket_name
+    )
 
-    return json_contents
-
-  @classmethod
-  def load_from_json(Cls, filepath):
-    """creates and returns an instance of `Storyboard` using a chapters JSON file (see README)
-    """
-    chapters = []
-
-    assert os.path.exists(filepath)
-
-    with open(filepath, 'r') as json_file:
-      json_contents = json.load(json_file)
-
-    for json_chapter in json_contents['chapters']:
-      bar = Bar.from_json(json_chapter['bar'])
-      path_to_multimedia = None if json_chapter['multimedia'] is None else pathlib.Path(json_chapter['multimedia'])
-      chapters.append(StoryboardChapter(bar, path_to_multimedia))
-
-    return Cls(chapters, json_contents['source_file'])
+  def delete(self):
+    cloud_storage.delete_file(
+      TableOfContents.path(self.song_id), 
+      self.bucket_name
+    )
 
   @classmethod
-  def create_new(Cls, path_to_song):
-    """...
+  def path(Cls, song_id):
+    return Path(song_id).joinpath(Cls.FILENAME)
+
+  @classmethod
+  def exists(Cls, song_id):
+    path = Cls.path(song_id)
+    return cloud_storage.file_exists(path, BUCKET_NAME)
+
+  @classmethod
+  def from_json(Cls, json_table_of_contents):
     """
-    lyrics = Lyrics.load_from_audio(path_to_song)
-    chapters = [StoryboardChapter(bar) for bar in lyrics.bars]
-    return Cls(chapters, lyrics.source_file)
+    """
+    song_id = json_table_of_contents['song_id']
+    video_style = json_table_of_contents['video_style']
+    bucket_name = json_table_of_contents['bucket_name']
+    chapters = [StoryboardChapter.from_json(song_id, video_style, json_chapter) \
+                  for json_chapter in json_table_of_contents['chapters']]
+
+    return Cls(song_id, video_style, bucket_name, chapters) 
 
 
+  @classmethod
+  def download(Cls, song_id):
+    path = Cls.path(song_id)
+    json_table_of_contents = cloud_storage.download_json(path, BUCKET_NAME)
+    return Cls.from_json(json_table_of_contents)
 
+  @classmethod
+  def create_new(Cls, song_id, audio_file, video_style=None):
+    """
+    """
+    all_lyrics = Lyric.load_all_from_audio(str(audio_file))
+
+    table_of_contents = Cls(
+      song_id, 
+      video_style,
+      BUCKET_NAME,
+      [StoryboardChapter(song_id, video_style, lyric) for lyric in all_lyrics], 
+    )
+
+    table_of_contents.upload()
+
+    return table_of_contents
