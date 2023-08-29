@@ -64,4 +64,4 @@ def create_notebook():
   nbformat.write(notebook, filename)
 
 if __name__ == '__main__':
-  create_notebook()
+  create_notebook('../storyboard/storybook/main.py')
