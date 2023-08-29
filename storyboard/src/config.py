@@ -21,6 +21,16 @@ def get_enviroment_variable(key):
   else:
     raise InvalidConfig(f'enviroment variable does not exist for "{key}"')
 
+def get_storyboard_bucket_name():
+  """
+  """
+  return get_enviroment_variable('STORYBOARD_BUCKET_NAME')
+
+def get_audio_file_bucket_name():
+  """
+  """
+  return get_enviroment_variable('AUDIO_FILE_BUCKET_NAME')
+
 def get_gcp_project_id():
   """
   """
@@ -59,13 +69,13 @@ class Config:
   ```
   {
     "audio_file": "path/to/song.mp3",
-    "storyboard_directory": "path/to/directory/that/will/contain/the/generated/music/video"
+    "song_id": "my-song-id"
   }  
   ```
   """
 
   audio_file: pathlib.Path
-  storyboard_directory: pathlib.Path
+  song_id: str
 
   @classmethod
   def load(Cls, path_to_config):
@@ -79,7 +89,7 @@ class Config:
 
     if not 'audio_file' in config:
       raise InvalidConfig("missing 'audio_file' key in config file")
-    if not 'storyboard_directory' in config:
+    if not 'song_id' in config:
       raise InvalidConfig("missing 'storyboard_directory' key in config file")
 
     audio_file = config['audio_file']
@@ -88,9 +98,9 @@ class Config:
     if not audio_file.endswith('.mp3') and not audio_file.endswith('.wav'):
       raise InvalidConfig(f"audio file is not an mp3 or wav: {audio_file}")
 
-    storyboard_directory = config['storyboard_directory']
+    song_id = config['song_id']
 
-    return Cls(audio_file, storyboard_directory)
+    return Cls(audio_file, song_id)
 
 def load_from_file(path_to_config_file): 
   return Config.load(path_to_config_file)
