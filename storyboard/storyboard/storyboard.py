@@ -3,7 +3,7 @@
 import os
 import json
 from dataclasses import dataclass
-from typing import List
+from typing import List, Iterator
 from pathlib import Path
 
 from . import cloud_storage
@@ -29,8 +29,8 @@ class StoryboardChapter:
     return self.lyric.line_number
 
   @property
-  def multimedia(self) -> Path:
-    """path to directory containing multimedia for the chapter
+  def path_to_content(self) -> Path:
+    """path to directory containing path_to_content for the chapter
     """
     return Path(self.song_id).joinpath(f'chapter-{self.number}')
 
@@ -39,8 +39,11 @@ class StoryboardChapter:
     """
     return {
       'lyric': self.lyric.as_dict(),
-      'multimedia': str(self.multimedia),
+      'path_to_content': str(self.path_to_content),
     }
+
+  def generate_content(self) -> Iterator[BytesIO]:
+    yield from cloud_storage.generate_files_as_bytes(self.path_to_content, BUCKET_NAME)
 
   @classmethod
   def from_json(Cls, song_id, style, json_chapter):

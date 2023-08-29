@@ -85,7 +85,7 @@ class StoryboardJob:
     job_id = chapter.number
     prompt = generate_prompt(chapter)
     style = chapter.style
-    output_directory = chapter.multimedia
+    output_directory = chapter.path_to_content
     status = JobStatus.IDLE
     return Cls(job_id, prompt, style, output_directory, status)
 
