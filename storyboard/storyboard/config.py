@@ -13,7 +13,8 @@ DEFAULT_CONFIG = {
   'INPUT_AUDIO_BUCKET_NAME': 'music-video-audio',
   'STORYBOARD_BUCKET_NAME': 'music-video-storyboards',
   'LOG_BUCKET': 'music-video-storyboard-logs',
-  'PRODUCTION': True
+  'OUTPUT_BUCKET_NAME': 'auto-music-videos',
+  'PRODUCTION': True,
 }
 
 class InvalidConfig(Exception):
@@ -44,6 +45,11 @@ def get_input_audio_bucket_name():
   """
   """
   return get_enviroment_variable('INPUT_AUDIO_BUCKET_NAME')
+
+def get_output_bucket_name():
+  """
+  """
+  return get_enviroment_variable('OUTPUT_BUCKET_NAME')
 
 def get_gcp_project_id():
   """
