@@ -12,7 +12,8 @@ DEFAULT_CONFIG = {
   'VERBOSE': False,
   'INPUT_AUDIO_BUCKET_NAME': 'music-video-audio',
   'STORYBOARD_BUCKET_NAME': 'music-video-storyboards',
-  'LOG_BUCKET': 'music-video-storyboard-logs'
+  'LOG_BUCKET': 'music-video-storyboard-logs',
+  'PRODUCTION': True
 }
 
 class InvalidConfig(Exception):
@@ -30,6 +31,9 @@ def get_enviroment_variable(key):
 
 def is_verbose():
   return get_enviroment_variable('VERBOSE')
+
+def is_production():
+  return get_enviroment_variable('PRODUCTION')
 
 def get_storyboard_bucket_name():
   """
