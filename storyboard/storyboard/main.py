@@ -5,19 +5,23 @@ import time
 from .storyboard import TableOfContents
 from .job_queue import StoryboardJobQueue
 from .text_to_image import text_to_image
-from . import input_audio
+from . import cloud_storage
 
 def write_table_of_contents(song_id, song_path):
   """
   """
-  if input_audio.is_new_song(song_id):
-    input_audio.add_new_song(song_id, song_path)
+  if cloud_storage.inputs.is_new_song(song_id):
+    cloud_storage.inputs.upload_song(song_id, song_path)
 
   if not TableOfContents.exists(song_id):
     table_of_contents = TableOfContents.create_new(song_id, song_path)
     table_of_contents.upload()
     job_queue = StoryboardJobQueue.create_new(table_of_contents)
     job_queue.upload()
+
+def get_chapters(song_id):
+  assert TableOfContents.exists(song_id)
+  return TableOfContents.download(song_id).chapters
 
 def generate_jobs(song_id):
   job_queue = StoryboardJobQueue.download(song_id)
