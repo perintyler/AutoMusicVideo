@@ -32,8 +32,8 @@ from .log_print import logprint_message
 
 from . import cloud_storage
 
-def log_print(message):
-    logprint_message(message, author='deepdaze')
+log_print = (lambda message: None) if config.is_production() \
+       else (lambda message: logprint_message(message, author='deepdaze'))
 
 def exists(val):
     return val is not None
