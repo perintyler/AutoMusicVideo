@@ -46,7 +46,7 @@ def list_files(bucket_name, directory=None) -> List[storage.Blob]:
   bucket = client.get_bucket(bucket_name)
   return list(bucket.list_blobs(prefix=directory))
 
-def generate_files_as_bytes(cloud_path, bucket_name) -> Iterator[io.BytesIO]:
+def generate_files_as_bytes(bucket_name, directory=None) -> Iterator[io.BytesIO]:
   client = get_client()
   bucket = client.get_bucket(bucket_name)
   for blob in bucket.list_blobs(prefix=directory):
