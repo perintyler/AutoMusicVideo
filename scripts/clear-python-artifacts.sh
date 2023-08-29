@@ -8,3 +8,10 @@ rm -r $REPO_PATH/__pycach__
 rm -r $REPO_PATH/storyboard/__pycach__
 rm -r $REPO_PATH/*.egg-info
 rm -r $REPO_PATH/storyboard/*.egg-info
+rm -r $REPO_PATH/storyboard/build
+rm -r $REPO_PATH/storyboard/.pytest_cache
+rm -r $REPO_PATH/storyboard/__pycach__
+rm -r $REPO_PATH/storyboard/storyboard/.pytest_cache
+rm -r $REPO_PATH/storyboard/storyboard/__pycach__
+
+
