@@ -5,6 +5,11 @@ import librosa
 import moviepy.editor as mp
 from audio import Audio
 
+import storyboard
+
+def get_image_clips(chapter):
+  storyboard.generate_chapter_content(chapter):
+
 def create_video_from_gifs(infiles, outfile = None, gif_duration = None) -> mp.VideoFileClip:
   gif_clips = [mp.VideoFileClip(path_to_gif) for path_to_gif in infiles]
 
