@@ -13,6 +13,7 @@ def unify_source_code(filename, depth = 0):
     combined_source_code = python_module.read()
 
   if depth != 0:
+    # hacky way to make sure every module's main function doesn't get run
     combined_source_code = combined_source_code.replace(
       "if __name__ == '__main__':", 
       "if __name__ == '__main__' and False:"
