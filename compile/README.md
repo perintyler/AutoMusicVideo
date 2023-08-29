@@ -1,1 +1,0 @@
-# AutoMusicVideo::compile

@@ -10,7 +10,7 @@ from dotenv import load_dotenv, find_dotenv
 from google.cloud import storage
 from google.oauth2 import service_account
 
-from . import config
+from .. import config
 
 PATH_TO_SERVICE_KEY = 'service-keys/bucket-service-key.json'
 
@@ -41,7 +41,7 @@ def move_file(old_cloud_path, new_cloud_path, bucket_name):
   assert blob.exists()
   bucket.rename_blob(blob, new_name=str(new_cloud_path))
 
-def list_files(bucket_name, directory=None) -> List[storage.Blob]
+def list_files(bucket_name, directory=None) -> List[storage.Blob]:
   client = get_client()
   bucket = client.get_bucket(bucket_name)
   return list(bucket.list_blobs(prefix=directory))
@@ -87,6 +87,12 @@ def download_json(cloud_path, bucket_name) -> dict:
   blob = bucket.blob(str(cloud_path))
   json_string = blob.download_as_bytes(client=client)
   return json.loads(json_string)
+
+def download_bytes(cloud_path, bucket_name) -> dict:
+  client = get_client()
+  bucket = client.get_bucket(bucket_name)
+  blob = bucket.blob(str(cloud_path))
+  return blob.download_as_bytes(client=client)
 
 def download_file(cloud_path, local_path, bucket_name, overwrite = True):
   client = get_client()
