@@ -13,8 +13,6 @@ from . import config
 
 PATH_TO_SERVICE_KEY = 'service-keys/bucket-service-key.json'
 
-BUCKET_NAME = 'music-video-multimedia'
-
 OVERWRITE_EXISTING_FILES = False
 
 EXIT_IF_NO_CREDENTIALS = False
