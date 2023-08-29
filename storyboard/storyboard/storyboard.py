@@ -48,7 +48,7 @@ class StoryboardChapter:
     return cloud_storage.num_files(self.bucket_name, directory=self.path_to_content) 
 
   def generate_content(self) -> Iterator[BytesIO]:
-    yield from cloud_storage.generate_files_as_bytes(self.path_to_content, self.bucket_name)
+    yield from cloud_storage.generate_files_as_bytes(self.bucket_name, directory=self.path_to_content)
 
   @classmethod
   def from_json(Cls, json_chapter, song_id, style, bucket_name):
@@ -96,9 +96,9 @@ class TableOfContents:
     return Path(song_id).joinpath(Cls.FILENAME)
 
   @classmethod
-  def exists(Cls, song_id):
+  def exists(Cls, song_id, bucket_name=BUCKET_NAME):
     path = Cls.path(song_id)
-    return cloud_storage.file_exists(path, BUCKET_NAME)
+    return cloud_storage.file_exists(path, bucket_name)
 
   @classmethod
   def from_json(Cls, json_table_of_contents):
@@ -107,16 +107,21 @@ class TableOfContents:
     song_id = json_table_of_contents['song_id']
     video_style = json_table_of_contents['video_style']
     bucket_name = json_table_of_contents['bucket_name']
-    chapters = [StoryboardChapter.from_json(json_chapter, song_id, video_style, bucket_name) \
-                  for json_chapter in json_table_of_contents['chapters']]
+
+    chapters = [StoryboardChapter.from_json(
+      json_chapter, 
+      song_id, 
+      video_style, 
+      bucket_name
+    ) for json_chapter in json_table_of_contents['chapters']]
 
     return Cls(song_id, video_style, bucket_name, chapters) 
 
 
   @classmethod
-  def download(Cls, song_id):
+  def download(Cls, song_id, bucket_name=BUCKET_NAME):
     path = Cls.path(song_id)
-    json_table_of_contents = cloud_storage.download_json(path, BUCKET_NAME)
+    json_table_of_contents = cloud_storage.download_json(path, bucket_name)
     return Cls.from_json(json_table_of_contents)
 
   @classmethod
