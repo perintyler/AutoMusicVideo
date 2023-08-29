@@ -2,6 +2,7 @@
 
 import os
 import json
+from io import BytesIO
 from dataclasses import dataclass
 from typing import List, Iterator
 from pathlib import Path
@@ -21,6 +22,7 @@ class StoryboardChapter:
   song_id: str
   style: str
   lyric: Lyric
+  bucket_name: str
 
   @property
   def number(self) -> int:
@@ -42,15 +44,18 @@ class StoryboardChapter:
       'path_to_content': str(self.path_to_content),
     }
 
+  def num_content_files(self):
+    return cloud_storage.num_files(self.bucket_name, directory=self.path_to_content) 
+
   def generate_content(self) -> Iterator[BytesIO]:
-    yield from cloud_storage.generate_files_as_bytes(self.path_to_content, BUCKET_NAME)
+    yield from cloud_storage.generate_files_as_bytes(self.path_to_content, self.bucket_name)
 
   @classmethod
-  def from_json(Cls, song_id, style, json_chapter):
+  def from_json(Cls, json_chapter, song_id, style, bucket_name):
     """
     """
     lyric = Lyric.from_json(json_chapter['lyric'])
-    return Cls(song_id, style, lyric)
+    return Cls(song_id, style, lyric, bucket_name)
 
 @dataclass
 class TableOfContents:
@@ -102,7 +107,7 @@ class TableOfContents:
     song_id = json_table_of_contents['song_id']
     video_style = json_table_of_contents['video_style']
     bucket_name = json_table_of_contents['bucket_name']
-    chapters = [StoryboardChapter.from_json(song_id, video_style, json_chapter) \
+    chapters = [StoryboardChapter.from_json(json_chapter, song_id, video_style, bucket_name) \
                   for json_chapter in json_table_of_contents['chapters']]
 
     return Cls(song_id, video_style, bucket_name, chapters) 
@@ -115,7 +120,7 @@ class TableOfContents:
     return Cls.from_json(json_table_of_contents)
 
   @classmethod
-  def create_new(Cls, song_id, audio_file, video_style=None):
+  def create_new(Cls, song_id, audio_file, video_style=None, bucket_name=BUCKET_NAME):
     """
     """
     all_lyrics = Lyric.load_all_from_audio(str(audio_file))
@@ -123,8 +128,8 @@ class TableOfContents:
     table_of_contents = Cls(
       song_id, 
       video_style,
-      BUCKET_NAME,
-      [StoryboardChapter(song_id, video_style, lyric) for lyric in all_lyrics], 
+      bucket_name,
+      [StoryboardChapter(song_id, video_style, lyric, bucket_name) for lyric in all_lyrics], 
     )
 
     table_of_contents.upload()
