@@ -2,106 +2,208 @@
 
 import os
 import json
-import pathlib
+from pathlib import Path
 from enum import Enum
 from datetime import datetime
 from dataclasses import dataclass
+from typing import List
 
-class CloudService(Enum):
-  """supported services for text-to-image in the cloud"""
+from . import config
+from . import cloud_storage
+from .storyboard import StoryboardChapter, TableOfContents
 
-  GOOGLE_COMPUTE_ENGINE = "GCP"
-  GOOGLE_COLLAB = "Collab"
-  KAGGLE = "Kaggle"
-  AWS_EC2 = "EC2"
+BUCKET_NAME = config.get_storyboard_bucket_name()
+
+def generate_prompt(chapter: StoryboardChapter):
+  """
+  """
+  text_input = chapter.lyric.text
+  style = chapter.style
+  return text_input if style is None else f'{text_input} in the style of {style}'
+
+class JobStatus(Enum):
+  """"""
+  IDLE        = 'idle'
+  IN_PROGRESS = 'in_progress'
+  DONE        = 'done'
+  FAILED      = 'failed'
+
+  def serialize(self) -> str:
+    """returns a string that can be stored in JSON
+    """
+    return self.value
+
+  @classmethod
+  def from_json(Cls, json_status):
+    """
+    """
+    return Cls(json_status)
 
 @dataclass
-class TextToImageJob:
+class StoryboardJob:
 
+  job_id: int
   prompt: str
-  output_directory: pathlib.Path
-  in_progress: bool # TODO: change this to start_time (None if not in progress) so hanging jobs can be dealt with
+  style: str
+  output_directory: Path
+  status: JobStatus
 
-  def as_dict(self):
+  def is_idle(self): return self.status is JobStatus.IDLE
+  def is_done(self): return self.status is JobStatus.DONE
+  def in_progress(self): return self.status is JobStatus.IN_PROGRESS
+
+  def set_status(self, updated_status):
+    self.status = updated_status
+
+  def serialize(self):
+    """
+    """
     return {
+      "job_id": self.job_id,
       "prompt": self.prompt,
-      "output_directory": self.output_directory,
-      "in_progress": self.in_progress
+      "style": self.style,
+      "output_directory": str(self.output_directory),
+      "status": self.status.serialize()
     }
 
   @classmethod
-  def from_dict(Cls, props: dict):
-    return Cls(props['prompt'], props['output_directory'], props['in_progress'])
+  def from_json(Cls, props: dict):
+    """
+    """
+    return Cls(
+      int(props['job_id']),
+      props['prompt'], 
+      props['style'],
+      Path(props['output_directory']), 
+      JobStatus.from_json(props['status'])
+    )
+
+  @classmethod
+  def create_new(Cls, chapter: StoryboardChapter):
+    """
+    """
+    job_id = chapter.number
+    prompt = generate_prompt(chapter)
+    style = chapter.style
+    output_directory = chapter.multimedia
+    status = JobStatus.IDLE
+    return Cls(job_id, prompt, style, output_directory, status)
 
 @dataclass
-class TextToImageJobQueue:
+class StoryboardJobQueue:
 
-  def __init__(self, filepath):
-    self.filepath = filepath
+  FILENAME = 'job-queue.json'
 
-    if not os.path.exists(filepath):
-      with open(filepath, 'w') as queue_file:
-        json.dump({
-          'timestamp': datetime.now().strftime("%m-%d-%y_%H-%M-%S"),
-          'jobs': []
-        }, queue_file, indent=2)
+  song_id: str
+  bucket_name: str
+  jobs: List[StoryboardJob]
 
-  def _iterate_jobs(self):
-    """reads the queue file to create and yield instances of `TextToImageJob`
+  def get_job(self, job_id):
     """
-    with open(self.filepath) as queue_file:
-      job_queue = json.load(queue_file)['jobs']
+    """
+    return next((job for job in self.jobs if job.job_id == job_id), None)
 
-    for job_dict in job_queue:
-      yield TextToImageJob.from_dict(job_dict)
+  def get_idle_jobs(self):
+    return list(filter(lambda job: job.is_idle(), self.jobs))
 
-  def get_next_job(self):
+  def get_completed_jobs(self):
+    return list(filter(lambda job: job.is_done(), self.jobs))
+
+  def get_jobs_in_progress(self):
+    return list(filter(lambda job: job.in_progress(), self.jobs))
+
+  def num_jobs(self)             : return len(self.jobs)
+  def num_idle_jobs(self)        : return len(self.get_idle_jobs())
+  def num_completed_jobs(self)   : return len(self.get_completed_jobs())
+  def num_jobs_in_progress(self) : return len(self.get_jobs_in_progress())
+
+  def is_complete(self):
+    """returns true if all jobs have been marked as DONE
+    """
+    return len(self.get_completed_jobs()) == self.num_jobs()
+
+  def has_idle_jobs(self):
+    """
+    """
+    return self.num_idle_jobs() == 0
+
+  def next_job(self) -> StoryboardJob:
     """returns a job that hasn't been started, or None if there are no idle jobs
 
     The job won't be removed from the queue file until it is marked as complete
-    """    
-    for job in self._iterate_jobs():
-      if not job.in_progress():
-        return job
+    """
+    idle_jobs = self.get_idle_jobs()
 
-    return None
+    if len(idle_jobs) == 0:
+      next_job = None
+    else:
+      next_job = idle_jobs[0]
+      next_job.set_status(JobStatus.IN_PROGRESS)
 
-  def add_job(self, prompt, output_directory):
+    return next_job
+
+  def finish_job(self, job_id):
     """
     """
-    with open(self.filepath) as queue_file:
-      queue_file_contents = json.load(queue_file)
+    self.get_job(job_id).set_status(JobStatus.DONE)
 
-    queue_file_contents['jobs'].append({
-      'prompt': prompt, 
-      'output_directory': output_directory, 
-      'in_progress': False
-    })
-
-    with open(self.filepath, 'w') as queue_file:
-      json.dump(queue_file_contents, queue_file, indent=2)
-
-  def delete_job(self, output_directory):
+  def serialize(self):
     """
     """
-    with open(self.filepath) as queue_file:
-      job_queue = json.load(queue_file)['jobs']
+    return {
+      'song_id': self.song_id,
+      'path': str(StoryboardJobQueue.path(self.song_id)),
+      'bucket_name': self.bucket_name,
+      'jobs': [job.serialize() for job in self.jobs]
+    }
 
-    for job_index, job in enumerate(self._iterate_jobs()):
-      if job.output_directory == output_directory:
-        job_queue.pop(job_index)
-        break
-
-  def has_job(self, output_directory):
+  def upload(self):
     """
     """
-    for job in self._iterate_jobs():
-      if job.output_directory == output_directory:
-        return True
+    cloud_storage.upload_json(
+      self.serialize(), 
+      StoryboardJobQueue.path(self.song_id), 
+      self.bucket_name
+    )
 
-    return False
-
-  def is_empty(self):
-    """returns true if there are no idle jobs
+  def delete(self):
     """
-    return self.get_next_job() is None
+    """
+    return cloud_storage.delete_file(
+      StoryboardJobQueue.path(self.song_id),
+      BUCKET_NAME
+    )
+
+  @classmethod
+  def path(Cls, song_id):
+    return Path(song_id).joinpath(Cls.FILENAME)
+
+  @classmethod
+  def exists(Cls, song_id):
+    """
+    """
+    return cloud_storage.file_exists(
+      StoryboardJobQueue.path(song_id),
+      BUCKET_NAME
+    )
+
+  @classmethod
+  def create_new(Cls, table_of_contents):
+    """
+    """
+    job_queue = Cls(
+      table_of_contents.song_id,
+      table_of_contents.bucket_name,
+      [StoryboardJob.create_new(chapter) for chapter in table_of_contents.chapters]
+    )
+    job_queue.upload()
+    return job_queue
+
+  @classmethod
+  def download(Cls, song_id):
+    job_queue_json = cloud_storage.download_json(Cls.path(song_id), BUCKET_NAME)
+    return Cls(
+      job_queue_json['song_id'],
+      job_queue_json['bucket_name'],
+      [StoryboardJob.from_json(job_json) for job_json in job_queue_json['jobs']]
+    )
