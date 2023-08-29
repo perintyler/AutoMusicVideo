@@ -1,0 +1,4 @@
+moviepy==1.0.3
+librosa==0.10.0.post2
+soundfile==0.12.1
+../storyboard
