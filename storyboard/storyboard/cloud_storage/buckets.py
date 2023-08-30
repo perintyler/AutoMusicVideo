@@ -74,6 +74,12 @@ def upload_pil_image(pil_image, cloud_path, bucket_name, image_format='jpeg'):
     content_type=f'image/{image_format}'
   )
 
+def upload_from_string(string, cloud_path, bucket_name):
+  client = get_client()
+  bucket = client.get_bucket(bucket_name)
+  blob = bucket.blob(str(cloud_path))
+  blob.upload_from_string(decorator)
+
 def upload_json(json_data, cloud_path, bucket_name):
   client = get_client()
   bucket = client.get_bucket(bucket_name)
