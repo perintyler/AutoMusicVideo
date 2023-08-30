@@ -4,7 +4,7 @@ cachetools==5.3.1
 certifi==2023.7.22
 cffi==1.15.1
 charset-normalizer==3.2.0
-decorator==5.1.1
+decorator==4.3.0
 einops==0.6.1
 ffmpeg==1.4
 ffmpeg-python==0.2.0
