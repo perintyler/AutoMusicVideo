@@ -28,19 +28,20 @@ class MusicVideo:
     """
     scene_clips = [scene.as_clip() for scene in self.scenes]
     combined_scenes = concatenate_videoclips(scene_clips, method='compose')
-    print('attaching audio')
     return self.audio.attach_to(combined_scenes)
 
   def as_bytes(self) -> BytesIO:
-    video_bytes = BytesIO()
-    self.as_clip().write_videofile(video_bytes, codec='libx264', fps=FRAMES_PER_SECOND)
+    video_buffer = BytesIO()
+    self.as_clip().write_videofile(video_buffer, codec='libx264', audio_codec='aac', fps=FRAMES_PER_SECOND)
+    video_bytes = video_buffer.getvalue()
+    video_buffer.close()
     return video_bytes
 
   def save(self, outfile) -> VideoClip:
     """
     """
     video_clip = self.as_clip()
-    video_clip.write_videofile(outfile, codec='libx264', fps=FRAMES_PER_SECOND) # , audio_codec='aac')
+    video_clip.write_videofile(outfile, codec='libx264', audio_codec='aac', fps=FRAMES_PER_SECOND)
     return video_clip
 
   def upload(self):
