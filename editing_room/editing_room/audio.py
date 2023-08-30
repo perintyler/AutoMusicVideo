@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Tuple
-from moviepy.editor import AudioClip, VideoClip, afx as after_effects
+from moviepy.editor import AudioFileClip, VideoClip, afx as after_effects
 import librosa
 import soundfile
 import numpy
@@ -65,23 +65,13 @@ class Audio:
     sample_index = int(timestamp * self.samplerate)
     return self.waveform[sample_index, channel]
 
-  # def at(self, timestamp) -> Tuple[float]:
-  #   """
-  #   """
-  #   if self.is_mono():
-  #     return self.get_amplitude(timestamp, 0)
-
-  #   left_channel_sample = self.get_amplitude(timestamp, 0)
-  #   right_channel_sample = self.get_amplitude(timestamp, 1)
-  #   return (left_channel_sample, right_channel_sample)
-
-  def as_clip(self) -> AudioClip:
+  def as_clip(self) -> AudioFileClip:
     """
     returns this audio as a `moviepy` clip
     """
     temp_audio_file = os.path.join('/tmp', 'music-video-audio.wav')
     self.save_as_wav(temp_audio_file)
-    return AudioClip(temp_audio_file, duration=self.duration, fps=self.samplerate)
+    return AudioFileClip(temp_audio_file)
 
   def attach_to(self, video_clip: VideoClip) -> VideoClip:
     """
@@ -92,11 +82,13 @@ class Audio:
     video_clip.audio = after_effects.audio_loop(audio_clip, duration=video_clip.duration)
     return video_clip
 
-  def save_as_wav(self, outfile: Path, normalize_audio = False):
+  def save_as_wav(self, outfile: Path, normalize_audio = False) -> Path:
     """
     writes the waveform to a WAV file
     """
-    soundfile.write(str(outfile), self.waveform, self.samplerate, norm=normalize_audio)
+    mono_audio = self.as_mono()
+    soundfile.write(outfile, mono_audio.waveform, mono_audio.samplerate)
+    return Path(outfile)
 
   @classmethod
   def load(Cls, audio_file: Path):
