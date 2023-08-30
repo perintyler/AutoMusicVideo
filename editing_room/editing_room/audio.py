@@ -5,11 +5,13 @@ and a sample rate and can be loaded from an audio files or downloaded from
 the cloud storage with a song id
 """
 
+import os
 from pathlib import Path
 from dataclasses import dataclass
 from typing import List, Tuple
 from moviepy.editor import AudioClip, VideoClip, afx as after_effects
 import librosa
+import soundfile
 import numpy
 
 import storyboard
@@ -28,16 +30,6 @@ class Audio:
     """
     return self.waveform.shape[0] if len(self.waveform.shape) >= 2 else 1
 
-  def is_mono(self) -> bool:
-    """
-    """
-    return self.num_channels == 1
-
-  def is_stereo(self) -> bool:
-    """
-    """
-    return self.num_channels == 2
-
   @property
   def num_samples(self):
     """
@@ -51,34 +43,45 @@ class Audio:
     """
     return self.num_samples / self.samplerate
 
+  def is_mono(self) -> bool:
+    """
+    """
+    return self.num_channels == 1
+
+  def is_stereo(self) -> bool:
+    """
+    """
+    return self.num_channels == 2
+
   def as_mono(self) -> 'Audio':
     """
     """
     return Audio(numpy.mean(self.waveform, axis=0), self.samplerate, self.path)
-
-  def get_channel(self, channel):
-    """
-    """
-    assert channel < self.num_channels
-    return self.waveform[:,channel] if not self.is_mono() else self.waveform
 
   def get_amplitude(self, timestamp, channel) -> float:
     """
     """
     assert channel < self.num_channels
     sample_index = int(timestamp * self.samplerate)
-    return self.get_channel(channel)[sample_index]
+    return self.waveform[sample_index, channel]
 
-  def sample(self, timestamp) -> Tuple[float]:
-    """
-    """
-    return tuple(self.get_amplitude(timestamp, channel) for channel in range(self.num_channels))
+  # def at(self, timestamp) -> Tuple[float]:
+  #   """
+  #   """
+  #   if self.is_mono():
+  #     return self.get_amplitude(timestamp, 0)
+
+  #   left_channel_sample = self.get_amplitude(timestamp, 0)
+  #   right_channel_sample = self.get_amplitude(timestamp, 1)
+  #   return (left_channel_sample, right_channel_sample)
 
   def as_clip(self) -> AudioClip:
     """
     returns this audio as a `moviepy` clip
     """
-    return AudioClip(lambda t: self.sample(t), duration=self.duration, fps=self.samplerate)
+    temp_audio_file = os.path.join('/tmp', 'music-video-audio.wav')
+    self.save_as_wav(temp_audio_file)
+    return AudioClip(temp_audio_file, duration=self.duration, fps=self.samplerate)
 
   def attach_to(self, video_clip: VideoClip) -> VideoClip:
     """
@@ -93,7 +96,7 @@ class Audio:
     """
     writes the waveform to a WAV file
     """
-    librosa.output.write_wav(self.waveform, self.samplerate, normalize = normalize_audio)
+    soundfile.write(str(outfile), self.waveform, self.samplerate, norm=normalize_audio)
 
   @classmethod
   def load(Cls, audio_file: Path):
