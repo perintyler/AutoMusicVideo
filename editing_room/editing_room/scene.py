@@ -5,13 +5,27 @@ from dataclasses import dataclass
 
 from PIL import Image
 from numpy import asarray
-from moviepy.editor import ImageClip, concatenate_videoclips
+from moviepy.editor import TextClip, ImageClip, CompositeVideoClip, concatenate_videoclips
 import storyboard
 
 from .beats import Beats
 from .audio import Audio
 
 FRAMES_PER_SECOND = 24
+
+OVERLAY_LYRICS = True
+
+SAVE_SCENES_LOCALLY = True
+
+KAREOKE = False
+
+LYRICS_POSITION = ("center", "bottom")
+
+def get_karaoke_clip(video_clip, lyrics):
+  lyrics_clip = TextClip(lyrics, fontsize=24, color="gray")
+  lyrics_clip.set_duration(video_clip.duration)
+  lyrics_clip = lyrics_clip.set_position(LYRICS_POSITION)
+  return CompositeVideoClip([video_clip, lyrics_clip])
 
 @dataclass
 class Scene:
@@ -45,7 +59,18 @@ class Scene:
       image_clip = ImageClip(image_array, duration=subclip_duration)
       subclips.append(image_clip)
 
-    return concatenate_videoclips(subclips)
+    scene_clip = concatenate_videoclips(subclips)
+
+    if KAREOKE:
+      scene_clip = get_karaoke_clip(scene_clip, self.chapter.lyric.text)
+
+    if SAVE_SCENES_LOCALLY:
+      kareoke_clip.write_videofile(
+        f'scene-{self.chapter.number}.mp4', 
+        codec='libx264', audio_codec='aac', fps=FRAMES_PER_SECOND
+      )
+
+    return kareoke_clip
 
   @classmethod
   def create_all(Cls, audio: Audio, chapters: storyboard.Chapter, beats: Beats):
