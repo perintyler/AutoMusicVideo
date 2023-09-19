@@ -26,18 +26,21 @@ class StoryboardChapter:
 
   @property
   def number(self) -> int:
-    """chapter number
+    """
+    chapter number
     """
     return self.lyric.line_number
 
   @property
   def path_to_content(self) -> Path:
-    """path to directory containing path_to_content for the chapter
+    """
+    path to directory containing path_to_content for the chapter
     """
     return Path(self.song_id).joinpath(f'chapter-{self.number}')
 
   def as_dict(self) -> dict:
-    """serializes all chapter properties
+    """
+    serializes the chapter so it can be written to JSON
     """
     return {
       'lyric': self.lyric.as_dict(),
@@ -49,6 +52,9 @@ class StoryboardChapter:
 
   def generate_content(self) -> Iterator[BytesIO]:
     yield from cloud_storage.generate_files_as_bytes(self.bucket_name, directory=self.path_to_content)
+
+  def __eq__(self, other_chapter):
+    return self.song_id == other_chapter.song_id and self.number == other_chapter.number
 
   @classmethod
   def from_json(Cls, json_chapter, song_id, style, bucket_name):
