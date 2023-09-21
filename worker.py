@@ -1,4 +1,4 @@
-"""AutoMusicVideo | cloud_function.py"""
+"""AutoMusicVideo | worker.py"""
 
 import modal
 
@@ -26,8 +26,6 @@ def entrypoint(f):
 def cloud_function(gpu=None, timeout=None):
   """
   """
-  local_entry_point = modal.Stub(MODAL_PROJECT_NAME).local_entrypoint(local_entrypoint)
-
   file_filter = lambda filepath: not filepath.endswith('__pycache__') and not filepath.endswith('.pyc')
 
   file_mount = modal.Mount.from_local_dir('storyboard', condition=file_filter) \
