@@ -44,3 +44,17 @@ def cpu_function(long_lasting=True):
   """
   """
   return cloud_function(timeout=MAX_TIMEOUT if long_lasting is True else None)
+
+def gpu_function(A100=False, T4=False, num_gpus=DEFAULT_NUM_GPUS, long_lasting=True):
+  """
+  """
+  timeout = MAX_TIMEOUT if long_lasting is True else None
+
+  if A100 is True:
+    gpu = modal.gpu.A100(count=num_gpus)
+  elif T4 is True:
+    gpu=modal.gpu.T4(count=num_gpus)
+  else:
+    raise ValueError('gpu model must be specified (set `A100` or `T4` param to True)')
+
+  return cloud_function(gpu=gpu, timeout=timeout)
