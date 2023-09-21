@@ -58,3 +58,7 @@ def gpu_function(A100=False, T4=False, num_gpus=DEFAULT_NUM_GPUS, long_lasting=T
     raise ValueError('gpu model must be specified (set `A100` or `T4` param to True)')
 
   return cloud_function(gpu=gpu, timeout=timeout)
+
+def use_cpu(f): return cpu_function()(f)
+def use_A100(f): return gpu_function(A100=True)(f)
+def use_T4(f): return gpu_function(T4=True)
