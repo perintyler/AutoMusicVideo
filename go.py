@@ -1,36 +1,18 @@
+"""AutoMusicVideo | go.py"""
 
 import modal
 import os
 import sys
 import pathlib
 import subprocess
-import modal
 import asyncio
 import time
+import cloud_function
 
-INPUT_AUDIO_DIRECTORY = os.path.join('/AutoMusicVideo', 'input-audio')
-
-NUM_GPUS = 2
-T4 = modal.gpu.T4
-A100 = modal.gpu.A100
-GPU = modal.gpu.T4
-
-exclude = lambda filepath: not filepath.endswith('__pycache__') and not filepath.endswith('.pyc')
-
-file_mount = modal.Mount \
-            .from_local_dir('storyboard', condition=exclude) \
-            .add_local_dir('input-audio') \
-
-container_image = modal.Image.from_dockerfile('Dockerfile', context_mount=file_mount)
-
-stub = modal.Stub("storyboard-creation")
-
-@stub.function(
-  gpu=GPU(count=NUM_GPUS),
-  image=container_image, 
-  secret=modal.Secret.from_name("gcp-storage-secrets"),
-  timeout=60*60*24)
+@cloud_function.use_gpu
 async def do_next_job(song_id):
+  """
+  """
   import storyboard
   job = next(storyboard.generate_jobs())
   if job:
@@ -39,25 +21,27 @@ async def do_next_job(song_id):
   else:
     print('no jobs left')
 
-@stub.function(
-  gpu=GPU(count=NUM_GPUS),
-  image=container_image, 
-  secret=modal.Secret.from_name("gcp-storage-secrets"),
-  timeout=60*60*24)
+@cloud_function.use_cpu
 async def make_storybooks():
+  """
+  """
   import storyboard
 
-  for audio_file in os.listdir(INPUT_AUDIO_DIRECTORY):
-    song_path = pathlib.Path(INPUT_AUDIO_DIRECTORY).joinpath(audio_file)
+  input_audio_directory = pathlib.Path('/AutoMusicVideo').joinpath('input-audio')
+
+  for song_path in input_audio_directory.iterdir():
     song_id = song_path.stem
-    print(f'making storyboard for {song_id}: {song_path}')
+    print(f'writing table of contents for {song_id}')
     storyboard.write_table_of_contents(song_id, song_path)
     for job in storyboard.generate_jobs(song_id):
       storyboard.do_job(song_id, job)
+
     # await asyncio.gather(
     #   *[do_storyboard_job.remote.aio(song_id, job) for job in storyboard.generate_jobs(song_id)]
     # )
 
-@stub.local_entrypoint()
+@cloud_function.entrypoint
 def main():
-    make_storybooks.remote()
+  """
+  """
+  make_storybooks.remote()
