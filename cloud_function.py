@@ -39,3 +39,8 @@ def cloud_function(gpu=None, timeout=None):
     secret  = modal.Secret.from_name(MODAL_SECRETS_ID),
     timeout = timeout
   )
+
+def cpu_function(long_lasting=True):
+  """
+  """
+  return cloud_function(timeout=MAX_TIMEOUT if long_lasting is True else None)
