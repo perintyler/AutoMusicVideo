@@ -1,4 +1,4 @@
-"""AutoMusicVideo | go.py"""
+"""AutoMusicVideo | scheduled.py"""
 
 import modal
 import os
@@ -9,7 +9,7 @@ import asyncio
 import time
 import cloud_function
 
-@cloud_function.use_gpu
+@cloud_function.use_A100
 async def do_next_job(song_id):
   """
   """
