@@ -18,7 +18,7 @@ DEFAULT_NUM_EPOCHS = 20
 
 DEFAULT_NUM_LAYERS = 24
 
-DEFAULT_NUM_ITERATIONS = 1050
+DEFAULT_NUM_ITERATIONS = 300
 
 def text_to_image(prompt, output_directory, 
   bucket_name = None, 
