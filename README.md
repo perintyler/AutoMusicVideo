@@ -19,7 +19,9 @@ Video
 </p>
 
 
-https://github.com/perintyler/AutoMusicVideo/assets/19389561/bd69b57d-171b-42f0-8ef4-62334563503e
+https://github.com/perintyler/AutoMusicVideo/assets/19389561/566c8492-3ddd-4b41-b07f-f75160e95c8e
+
+
 
 ## Setup
 
